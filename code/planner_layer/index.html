@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Planner</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 48px;
+      width: 100%;
+      max-width: 680px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .card h1 {
+      font-size: 28px;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+
+    .card .subtitle {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 36px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #764ba2;
+      margin: 28px 0 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    input, select {
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #222;
+      outline: none;
+      transition: border 0.2s;
+      background: #fafafa;
+    }
+
+    input:focus, select:focus {
+      border-color: #764ba2;
+      background: white;
+    }
+
+    input::placeholder { color: #bbb; }
+
+    .optional-tag {
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 400;
+      margin-left: 4px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1.5px solid #f0f0f0;
+      margin: 28px 0 0;
+    }
+
+    .btn-next {
+      margin-top: 36px;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-next:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-next:active { transform: translateY(0); }
+
+    .summary-card { display: none; }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 15px;
+    }
+
+    .summary-row:last-of-type { border-bottom: none; }
+
+    .summary-key { color: #888; font-weight: 500; }
+    .summary-val { color: #222; font-weight: 600; text-align: right; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn-back {
+      padding: 14px;
+      background: #f5f5f5;
+      color: #555;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .error { color: #e53e3e; font-size: 12px; margin-top: 2px; display: none; }
+  </style>
+</head>
+<body>
+
+<!-- FORM PAGE -->
+<div class="card" id="formPage">
+  <h1>✈️ Plan Your Trip</h1>
+  <p class="subtitle">Fill in the details and we'll handle the rest.</p>
+
+  <div class="section-label">Where & When</div>
+  <div class="row">
+    <div class="field">
+      <label>Origin</label>
+      <input type="text" id="origin" placeholder="e.g. Waterloo, ON">
+      <span class="error" id="err-origin">Please enter your origin</span>
+    </div>
+    <div class="field">
+      <label>Destination</label>
+      <input type="text" id="destination" placeholder="e.g. Montreal, QC">
+      <span class="error" id="err-destination">Please enter your destination</span>
+    </div>
+    <div class="field">
+      <label>Start Date</label>
+      <input type="date" id="startDate">
+      <span class="error" id="err-startDate">Please select a start date</span>
+    </div>
+    <div class="field">
+      <label>End Date</label>
+      <input type="date" id="endDate">
+      <span class="error" id="err-endDate">Please select an end date</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="section-label">Travelers & Budget</div>
+  <div class="row">
+    <div class="field">
+      <label>Travelers</label>
+      <input type="number" id="travelers" min="1" placeholder="e.g. 2">
+      <span class="error" id="err-travelers">Please enter at least 1 traveler</span>
+    </div>
+    <div class="field">
+      <label>Budget (CAD)</label>
+      <input type="number" id="budget" min="0" placeholder="e.g. 1500">
+      <span class="error" id="err-budget">Please enter your budget</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="section-label">Preferences <span class="optional-tag">— optional</span></div>
+  <div class="row">
+    <div class="field">
+      <label>Travel Style</label>
+      <select id="travelStyle">
+        <option value="">-- Select --</option>
+        <option value="relaxed">Relaxed</option>
+        <option value="moderate">Moderate</option>
+        <option value="packed">Packed</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Accommodation</label>
+      <select id="accommodation">
+        <option value="">-- Select --</option>
+        <option value="hotel">Hotel</option>
+        <option value="hostel">Hostel</option>
+        <option value="airbnb">Airbnb</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Transport</label>
+      <select id="transport">
+        <option value="">-- Select --</option>
+        <option value="public">Public Transit</option>
+        <option value="car">Car Rental</option>
+        <option value="rideshare">Rideshare</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Food Preference</label>
+      <select id="food">
+        <option value="">-- Select --</option>
+        <option value="local">Local Cuisine</option>
+        <option value="vegetarian">Vegetarian</option>
+        <option value="halal">Halal</option>
+        <option value="any">No Preference</option>
+      </select>
+    </div>
+    <div class="field full">
+      <label>Must-see / Special Needs</label>
+      <input type="text" id="mustSee" placeholder="e.g. F1 Grand Prix on Saturday and Sunday">
+    </div>
+  </div>
+
+  <button class="btn-next" onclick="goToSummary()">Next →</button>
+</div>
+
+<!-- SUMMARY PAGE -->
+<div class="card summary-card" id="summaryPage">
+  <h1>📋 Trip Summary</h1>
+  <p class="subtitle">Please review your trip details before confirming.</p>
+
+  <div id="summaryContent" style="margin-top: 24px;"></div>
+
+  <div class="btn-row">
+    <button class="btn-back" onclick="goBack()">← Edit</button>
+    <button class="btn-confirm" onclick="confirmTrip()">✓ Confirm</button>
+  </div>
+</div>
+
+<script>
+  function validate() {
+    const fields = ['origin', 'destination', 'startDate', 'endDate', 'travelers', 'budget'];
+    let valid = true;
+
+    fields.forEach(id => {
+      const val = document.getElementById(id).value.trim();
+      const err = document.getElementById('err-' + id);
+      if (!val || (id === 'travelers' && val < 1)) {
+        err.style.display = 'block';
+        valid = false;
+      } else {
+        err.style.display = 'none';
+      }
+    });
+
+    // Check end date is after start date
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    if (start && end && end <= start) {
+      document.getElementById('err-endDate').textContent = 'End date must be after start date';
+      document.getElementById('err-endDate').style.display = 'block';
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  function goToSummary() {
+    if (!validate()) return;
+
+    const get = id => document.getElementById(id).value || '—';
+    const labels = {
+      origin: 'Origin',
+      destination: 'Destination',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      travelers: 'Travelers',
+      budget: 'Budget (CAD)',
+      travelStyle: 'Travel Style',
+      accommodation: 'Accommodation',
+      transport: 'Transport',
+      food: 'Food Preference',
+      mustSee: 'Must-see / Special Needs'
+    };
+
+    let html = '';
+    const required = ['origin', 'destination', 'startDate', 'endDate', 'travelers', 'budget'];
+    for (const [id, label] of Object.entries(labels)) {
+      const val = get(id);
+      if (val !== '—' || required.includes(id)) {
+        html += `<div class="summary-row">
+          <span class="summary-key">${label}</span>
+          <span class="summary-val">${val}</span>
+        </div>`;
+      }
+    }
+
+    document.getElementById('summaryContent').innerHTML = html;
+    document.getElementById('formPage').style.display = 'none';
+    const sp = document.getElementById('summaryPage');
+    sp.style.display = 'block';
+  }
+
+  function goBack() {
+    document.getElementById('summaryPage').style.display = 'none';
+    document.getElementById('formPage').style.display = 'block';
+  }
+
+  function confirmTrip() {
+    alert('Trip confirmed! Data will be passed to the next Agent.');
+  }
+</script>
+
+</body>
+</html>
