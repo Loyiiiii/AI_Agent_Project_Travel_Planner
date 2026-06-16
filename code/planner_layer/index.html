@@ -4,348 +4,585 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sand:#F7F3EE; --stone:#E8E0D5; --ink:#1C1917;
+      --mist:#6B6560; --accent:#2D5F8A; --error:#B85450; --white:#FFFFFF;
     }
+    html, body { height: 100%; }
+    body { font-family:'Inter',sans-serif; background:var(--ink); overflow:hidden; }
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 48px;
-      width: 100%;
-      max-width: 680px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    .section {
+      display:none; height:100vh; width:100%;
+      align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
     }
+    .section.active { display:flex; }
 
-    .card h1 {
-      font-size: 28px;
-      color: #1a1a2e;
-      margin-bottom: 6px;
+    /* HERO */
+    #hero { background:var(--ink); }
+    .hero-bg { position:absolute; inset:0; background-image:url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600&q=80'); background-size:cover; background-position:center; filter:brightness(.45); transition:transform 8s ease; }
+    #hero:hover .hero-bg { transform:scale(1.03); }
+    .hero-content { position:relative; z-index:2; text-align:center; padding:40px 24px; max-width:700px; }
+    .hero-eyebrow { font-size:11px; font-weight:500; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,.55); margin-bottom:24px; }
+    .hero-title { font-family:'Cormorant Garamond',serif; font-size:clamp(48px,8vw,88px); font-weight:300; color:#fff; line-height:1.05; margin-bottom:28px; }
+    .hero-title em { font-style:italic; }
+    .hero-sub { font-size:15px; font-weight:300; color:rgba(255,255,255,.65); line-height:1.7; margin-bottom:48px; max-width:440px; margin-left:auto; margin-right:auto; }
+    .btn-hero { display:inline-flex; align-items:center; gap:10px; padding:16px 36px; background:#fff; color:var(--ink); font-size:13px; font-weight:600; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s,color .2s; font-family:inherit; }
+    .btn-hero:hover { background:var(--accent); color:#fff; }
+
+    /* SPLIT LAYOUT */
+    .split { display:grid; grid-template-columns:1fr 1.55fr; width:100%; max-width:1100px; height:100vh; }
+    .sl { display:flex; flex-direction:column; justify-content:center; padding:80px 56px; border-right:1px solid var(--stone); overflow:hidden; }
+    .sr { display:flex; flex-direction:column; justify-content:center; padding:60px 56px; overflow-y:auto; }
+    .step-eyebrow { font-size:11px; font-weight:500; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:20px; }
+    .split-h { font-family:'Cormorant Garamond',serif; font-size:42px; font-weight:300; color:var(--ink); line-height:1.15; margin-bottom:16px; }
+    .split-p { font-size:14px; color:var(--mist); line-height:1.7; max-width:260px; }
+
+    /* FORM */
+    #form-section { background:var(--sand); align-items:stretch; }
+    .field-group { margin-bottom:24px; }
+    .group-label { font-size:10px; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; color:var(--mist); margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--stone); }
+    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .field { display:flex; flex-direction:column; gap:6px; position:relative; }
+    label { font-size:11px; font-weight:500; letter-spacing:.5px; color:var(--mist); text-transform:uppercase; }
+    input[type="text"], input[type="number"] { padding:12px 0; border:none; border-bottom:1.5px solid var(--stone); background:transparent; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); outline:none; transition:border-color .2s; width:100%; border-radius:0; }
+    input:focus { border-bottom-color:var(--accent); }
+    input::placeholder { color:#C4BDB6; font-weight:300; }
+    input.invalid { border-bottom-color:var(--error); }
+    .ferr { font-size:11px; color:var(--error); display:none; margin-top:2px; }
+    .ferr.show { display:block; }
+
+    /* Autocomplete */
+    .ac-list { position:absolute; top:100%; left:0; right:0; z-index:9999; background:#fff; border:1px solid var(--stone); border-top:none; max-height:180px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,.1); }
+    .ac-list div { padding:10px 14px; font-size:14px; cursor:pointer; color:var(--ink); }
+    .ac-list div:hover { background:var(--sand); }
+
+    /* Date trigger */
+    .date-trig { display:flex; align-items:stretch; border-bottom:1.5px solid var(--stone); cursor:pointer; transition:border-color .2s; padding:12px 0; }
+    .date-trig:hover, .date-trig.open { border-bottom-color:var(--accent); }
+    .ds { flex:1; display:flex; flex-direction:column; gap:4px; }
+    .ds-lbl { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--mist); }
+    .ds-val { font-size:15px; color:var(--ink); }
+    .ds-val.ph { color:#C4BDB6; font-weight:300; }
+    .ds-div { width:1px; background:var(--stone); margin:0 20px; }
+
+    /* CALENDAR — compact, fixed position */
+    .cal { display:none; position:fixed; z-index:99999; background:#fff; border:1px solid var(--stone); box-shadow:0 12px 40px rgba(0,0,0,.15); border-radius:6px; padding:10px; width:238px; }
+    .cal.open { display:block; }
+    .cal-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .cal-nav-lbl { font-size:12px; font-weight:600; color:var(--ink); }
+    .cal-nav-btn { background:none; border:1px solid var(--stone); width:22px; height:22px; cursor:pointer; font-size:12px; color:var(--mist); border-radius:2px; display:flex; align-items:center; justify-content:center; font-family:inherit; transition:border-color .15s; }
+    .cal-nav-btn:hover { border-color:var(--ink); color:var(--ink); }
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; }
+    .cal-dow { font-size:8px; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:var(--mist); text-align:center; padding:0 0 4px; }
+    .cal-day { height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; transition:background .1s,color .1s; user-select:none; }
+    .cal-day:hover:not(.dis):not(.emp) { background:var(--stone); }
+    .cal-day.dis { color:#ccc; cursor:not-allowed; pointer-events:none; }
+    .cal-day.emp { pointer-events:none; }
+    .cal-day.inr { background:#dce9f4; }
+    .cal-day.rs { background:var(--accent); color:#fff; border-radius:3px 0 0 3px; }
+    .cal-day.re { background:var(--accent); color:#fff; border-radius:0 3px 3px 0; }
+    .cal-day.rs.re { border-radius:3px; }
+    .cal-foot { display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:8px; border-top:1px solid var(--stone); }
+    .cal-clr { background:none; border:none; font-size:11px; font-weight:500; color:var(--mist); cursor:pointer; font-family:inherit; text-decoration:underline; text-underline-offset:2px; }
+    .cal-ok { background:var(--ink); border:none; padding:5px 12px; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#fff; cursor:pointer; border-radius:2px; font-family:inherit; }
+
+    /* PREFERENCES */
+    #pref-section { background:var(--sand); align-items:stretch; }
+    .pref-progress-track { position:absolute; top:0; left:0; right:0; height:3px; background:var(--stone); z-index:10; }
+    .pref-progress-fill { height:100%; background:var(--accent); width:0%; transition:width .5s ease; }
+    .pref-sl { background:var(--ink); border-right:1px solid #2e2a27; }
+    .pref-sl .step-eyebrow { color:rgba(255,255,255,.35); }
+    .pref-sl .split-h { color:#fff; }
+    .pref-sl .split-p { color:rgba(255,255,255,.45); max-width:none; }
+    .pref-li { transition:opacity .25s ease, transform .25s ease; }
+    .pref-li.fading { opacity:0; transform:translateY(10px); }
+    .pref-note { font-size:11px; color:rgba(255,255,255,.25); margin-top:20px; }
+    .pref-sr { justify-content:space-between; }
+    .pref-viewport { flex:1; display:flex; align-items:center; overflow:hidden; }
+    .pref-step { display:none; width:100%; }
+    .pref-step.active { display:block; }
+    .pref-step.slide-r { animation:slideR .35s cubic-bezier(.4,0,.2,1); }
+    .pref-step.slide-l { animation:slideL .35s cubic-bezier(.4,0,.2,1); }
+    @keyframes slideR { from{opacity:0;transform:translateX(32px)} to{opacity:1;transform:none} }
+    @keyframes slideL { from{opacity:0;transform:translateX(-32px)} to{opacity:1;transform:none} }
+
+    /* Chips */
+    .chip-group { display:flex; flex-wrap:wrap; gap:10px; }
+    .chip { padding:9px 16px; border:1.5px solid var(--stone); border-radius:100px; font-size:13px; font-weight:500; color:var(--mist); cursor:pointer; transition:all .15s; user-select:none; }
+    .chip:hover { border-color:var(--accent); color:var(--accent); }
+    .chip.selected { border-color:var(--accent); background:var(--accent); color:#fff; }
+    .pref-text-in { width:100%; padding:14px 0; border:none; border-bottom:1.5px solid var(--stone); font-family:'Inter',sans-serif; font-size:16px; color:var(--ink); background:transparent; outline:none; transition:border-color .2s; border-radius:0; }
+    .pref-text-in:focus { border-bottom-color:var(--accent); }
+    .pref-text-in::placeholder { color:#C4BDB6; font-weight:300; }
+    .pref-nav { display:flex; align-items:center; gap:12px; padding:24px 0 0; border-top:1px solid var(--stone); }
+    .btn-pb { padding:13px 20px; background:transparent; color:var(--mist); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:1.5px solid var(--stone); border-radius:2px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .btn-pb:hover { border-color:var(--ink); color:var(--ink); }
+    .btn-ps { padding:13px 0; background:none; color:#B0A9A2; font-family:'Inter',sans-serif; font-size:11px; font-weight:500; letter-spacing:1px; text-transform:uppercase; border:none; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+    .btn-ps:hover { color:var(--mist); }
+    .btn-pn { flex:1; padding:13px 24px; background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
+    .btn-pn:hover { background:var(--accent); }
+
+    /* Submit */
+    .btn-sub { width:100%; margin-top:32px; padding:15px 24px; background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
+    .btn-sub:hover { background:var(--accent); }
+
+    /* SUMMARY */
+    #summary-section { background:#fff; align-items:stretch; }
+    .sum-sl { background:var(--ink); border-right:1px solid #2e2a27; }
+    .sum-sl .step-eyebrow { color:rgba(255,255,255,.35); }
+    .sum-sl .split-h { color:#fff; }
+    .sum-sl .split-p { color:rgba(255,255,255,.45); }
+    .sum-row { display:flex; justify-content:space-between; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--stone); gap:24px; }
+    .sum-row:last-of-type { border-bottom:none; }
+    .sum-k { font-size:11px; font-weight:500; letter-spacing:1px; text-transform:uppercase; color:var(--mist); white-space:nowrap; }
+    .sum-v { font-family:'Cormorant Garamond',serif; font-size:19px; color:var(--ink); text-align:right; }
+    .sum-acts { display:flex; gap:12px; margin-top:40px; }
+    .btn-edit { padding:15px 24px; background:transparent; color:var(--mist); font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:1.5px solid var(--stone); border-radius:2px; cursor:pointer; transition:all .2s; }
+    .btn-edit:hover { border-color:var(--ink); color:var(--ink); }
+    .btn-cfm { flex:1; padding:15px 24px; background:var(--accent); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
+    .btn-cfm:hover { background:var(--ink); }
+
+    /* CONFIRMED */
+    #confirmed-section { background:var(--ink); }
+    .conf-wrap { text-align:center; color:#fff; padding:40px 24px; max-width:560px; }
+    .conf-icon { font-size:48px; margin-bottom:32px; display:block; }
+    .conf-h { font-family:'Cormorant Garamond',serif; font-size:52px; font-weight:300; line-height:1.1; margin-bottom:16px; }
+    .conf-p { font-size:14px; color:rgba(255,255,255,.5); line-height:1.7; }
+
+    @media(max-width:768px){
+      .split{grid-template-columns:1fr;height:auto;min-height:100vh;}
+      .sl,.pref-sl,.sum-sl{padding:48px 28px 28px;border-right:none;border-bottom:1px solid var(--stone);}
+      .sr,.pref-sr{padding:28px 28px 48px;}
+      .g2{grid-template-columns:1fr;}
+      .cal{width:calc(100vw - 32px);}
+      body{overflow-y:auto;}
     }
-
-    .card .subtitle {
-      color: #888;
-      font-size: 14px;
-      margin-bottom: 36px;
-    }
-
-    .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: #764ba2;
-      margin: 28px 0 14px;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .field.full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #444;
-    }
-
-    input, select {
-      padding: 12px 14px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 14px;
-      color: #222;
-      outline: none;
-      transition: border 0.2s;
-      background: #fafafa;
-    }
-
-    input:focus, select:focus {
-      border-color: #764ba2;
-      background: white;
-    }
-
-    input::placeholder { color: #bbb; }
-
-    .optional-tag {
-      font-size: 11px;
-      color: #aaa;
-      font-weight: 400;
-      margin-left: 4px;
-    }
-
-    .divider {
-      border: none;
-      border-top: 1.5px solid #f0f0f0;
-      margin: 28px 0 0;
-    }
-
-    .btn-next {
-      margin-top: 36px;
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-next:hover { opacity: 0.92; transform: translateY(-1px); }
-    .btn-next:active { transform: translateY(0); }
-
-    .summary-card { display: none; }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 15px;
-    }
-
-    .summary-row:last-of-type { border-bottom: none; }
-
-    .summary-key { color: #888; font-weight: 500; }
-    .summary-val { color: #222; font-weight: 600; text-align: right; }
-
-    .btn-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 32px;
-    }
-
-    .btn-back {
-      padding: 14px;
-      background: #f5f5f5;
-      color: #555;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    .btn-confirm {
-      padding: 14px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      font-size: 15px;
-      font-weight: 700;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    .error { color: #e53e3e; font-size: 12px; margin-top: 2px; display: none; }
   </style>
 </head>
 <body>
 
-<!-- FORM PAGE -->
-<div class="card" id="formPage">
-  <h1>✈️ Plan Your Trip</h1>
-  <p class="subtitle">Fill in the details and we'll handle the rest.</p>
+<!-- HERO -->
+<section class="section active" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">AI Travel Planner</p>
+    <h1 class="hero-title">Where do you<br>want to <em>go?</em></h1>
+    <p class="hero-sub">Tell us about your trip and our AI agents will craft the perfect itinerary for you.</p>
+    <button class="btn-hero" onclick="showPage('form-section')">Start Planning →</button>
+  </div>
+</section>
 
-  <div class="section-label">Where & When</div>
-  <div class="row">
-    <div class="field">
-      <label>Origin</label>
-      <input type="text" id="origin" placeholder="e.g. Waterloo, ON">
-      <span class="error" id="err-origin">Please enter your origin</span>
+<!-- FORM -->
+<section class="section" id="form-section">
+  <div class="split">
+    <div class="sl">
+      <p class="step-eyebrow">Step 01 — Basics</p>
+      <h2 class="split-h">Tell us about<br>your trip</h2>
+      <p class="split-p">Fill in the required fields. We'll ask about your preferences next.</p>
     </div>
-    <div class="field">
-      <label>Destination</label>
-      <input type="text" id="destination" placeholder="e.g. Montreal, QC">
-      <span class="error" id="err-destination">Please enter your destination</span>
-    </div>
-    <div class="field">
-      <label>Start Date</label>
-      <input type="date" id="startDate">
-      <span class="error" id="err-startDate">Please select a start date</span>
-    </div>
-    <div class="field">
-      <label>End Date</label>
-      <input type="date" id="endDate">
-      <span class="error" id="err-endDate">Please select an end date</span>
+    <div class="sr">
+      <div class="field-group">
+        <div class="group-label">Where & When</div>
+        <div class="g2">
+          <div class="field">
+            <label>Origin</label>
+            <input type="text" id="origin" placeholder="e.g. Waterloo, ON" autocomplete="off" oninput="acCity(this,'ac-origin','origin')">
+            <div class="ac-list" id="ac-origin"></div>
+            <span class="ferr" id="err-origin">Please select a valid city</span>
+          </div>
+          <div class="field">
+            <label>Destination</label>
+            <input type="text" id="destination" placeholder="e.g. Montreal, QC" autocomplete="off" oninput="acCity(this,'ac-destination','destination')">
+            <div class="ac-list" id="ac-destination"></div>
+            <span class="ferr" id="err-destination">Please select a valid city</span>
+          </div>
+        </div>
+        <div style="margin-top:20px;">
+          <label>Travel Dates</label>
+          <div class="date-trig" id="dateTrig" onclick="toggleCal(event)">
+            <div class="ds"><span class="ds-lbl">Check-in</span><span class="ds-val ph" id="dStart">Add date</span></div>
+            <div class="ds-div"></div>
+            <div class="ds"><span class="ds-lbl">Check-out</span><span class="ds-val ph" id="dEnd">Add date</span></div>
+          </div>
+          <span class="ferr" id="err-dates">Please select your travel dates</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="group-label">Travelers & Budget</div>
+        <div class="g2">
+          <div class="field">
+            <label>Number of Travelers</label>
+            <input type="number" id="travelers" min="1" placeholder="1" oninput="clamp(this,1)">
+            <span class="ferr" id="err-travelers">Must be at least 1</span>
+          </div>
+          <div class="field">
+            <label>Budget (CAD)</label>
+            <input type="number" id="budget" min="0" placeholder="e.g. 1500" oninput="clamp(this,0)">
+            <span class="ferr" id="err-budget">Must be 0 or more</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-sub" onclick="goToPrefs()">Next: Preferences →</button>
     </div>
   </div>
+</section>
 
-  <hr class="divider">
-  <div class="section-label">Travelers & Budget</div>
-  <div class="row">
-    <div class="field">
-      <label>Travelers</label>
-      <input type="number" id="travelers" min="1" placeholder="e.g. 2">
-      <span class="error" id="err-travelers">Please enter at least 1 traveler</span>
+<!-- PREFERENCES -->
+<section class="section" id="pref-section">
+  <div class="pref-progress-track"><div class="pref-progress-fill" id="prefFill"></div></div>
+  <div class="split">
+    <div class="sl pref-sl">
+      <div class="pref-li" id="prefLI">
+        <p class="step-eyebrow" id="prefNum">1 of 9</p>
+        <h2 class="split-h" id="prefTitle"></h2>
+        <p class="split-p" id="prefDesc"></p>
+        <p class="pref-note">Optional — select all that apply</p>
+      </div>
     </div>
-    <div class="field">
-      <label>Budget (CAD)</label>
-      <input type="number" id="budget" min="0" placeholder="e.g. 1500">
-      <span class="error" id="err-budget">Please enter your budget</span>
+    <div class="sr pref-sr">
+      <div class="pref-viewport" id="prefViewport"></div>
+      <div class="pref-nav">
+        <button class="btn-pb" id="prefBack" onclick="prevPref()">← Edit Trip</button>
+        <button class="btn-ps" onclick="skipPref()">Skip</button>
+        <button class="btn-pn" id="prefNext" onclick="nextPref()">Next →</button>
+      </div>
     </div>
   </div>
+</section>
 
-  <hr class="divider">
-  <div class="section-label">Preferences <span class="optional-tag">— optional</span></div>
-  <div class="row">
-    <div class="field">
-      <label>Travel Style</label>
-      <select id="travelStyle">
-        <option value="">-- Select --</option>
-        <option value="relaxed">Relaxed</option>
-        <option value="moderate">Moderate</option>
-        <option value="packed">Packed</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Accommodation</label>
-      <select id="accommodation">
-        <option value="">-- Select --</option>
-        <option value="hotel">Hotel</option>
-        <option value="hostel">Hostel</option>
-        <option value="airbnb">Airbnb</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Transport</label>
-      <select id="transport">
-        <option value="">-- Select --</option>
-        <option value="public">Public Transit</option>
-        <option value="car">Car Rental</option>
-        <option value="rideshare">Rideshare</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Food Preference</label>
-      <select id="food">
-        <option value="">-- Select --</option>
-        <option value="local">Local Cuisine</option>
-        <option value="vegetarian">Vegetarian</option>
-        <option value="halal">Halal</option>
-        <option value="any">No Preference</option>
-      </select>
-    </div>
-    <div class="field full">
-      <label>Must-see / Special Needs</label>
-      <input type="text" id="mustSee" placeholder="e.g. F1 Grand Prix on Saturday and Sunday">
-    </div>
+<!-- Calendar — fixed at document root -->
+<div class="cal" id="calPop">
+  <div class="cal-hdr">
+    <button class="cal-nav-btn" onclick="calShift(-1)">&#8249;</button>
+    <span class="cal-nav-lbl" id="calLbl"></span>
+    <button class="cal-nav-btn" onclick="calShift(1)">&#8250;</button>
   </div>
-
-  <button class="btn-next" onclick="goToSummary()">Next →</button>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-foot">
+    <button class="cal-clr" onclick="calClear()">Clear dates</button>
+    <button class="cal-ok" onclick="calClose()">Done</button>
+  </div>
 </div>
 
-<!-- SUMMARY PAGE -->
-<div class="card summary-card" id="summaryPage">
-  <h1>📋 Trip Summary</h1>
-  <p class="subtitle">Please review your trip details before confirming.</p>
-
-  <div id="summaryContent" style="margin-top: 24px;"></div>
-
-  <div class="btn-row">
-    <button class="btn-back" onclick="goBack()">← Edit</button>
-    <button class="btn-confirm" onclick="confirmTrip()">✓ Confirm</button>
+<!-- SUMMARY -->
+<section class="section" id="summary-section">
+  <div class="split">
+    <div class="sl sum-sl">
+      <p class="step-eyebrow">Step 03 — Review</p>
+      <h2 class="split-h">Looks good?</h2>
+      <p class="split-p">Review your details. Edit to make changes, or confirm to start planning.</p>
+    </div>
+    <div class="sr">
+      <div id="sumContent"></div>
+      <div class="sum-acts">
+        <button class="btn-edit" onclick="goEditPrefs()">← Edit</button>
+        <button class="btn-cfm" onclick="confirmTrip()">Confirm & Plan →</button>
+      </div>
+    </div>
   </div>
-</div>
+</section>
+
+<!-- CONFIRMED -->
+<section class="section" id="confirmed-section">
+  <div class="conf-wrap">
+    <span class="conf-icon">✦</span>
+    <h2 class="conf-h">Your trip is<br>in good hands.</h2>
+    <p class="conf-p">Your details have been passed to the planning agents. They're working on your itinerary now.</p>
+  </div>
+</section>
 
 <script>
-  function validate() {
-    const fields = ['origin', 'destination', 'startDate', 'endDate', 'travelers', 'budget'];
-    let valid = true;
+// PAGE NAV
+function showPage(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-    fields.forEach(id => {
-      const val = document.getElementById(id).value.trim();
-      const err = document.getElementById('err-' + id);
-      if (!val || (id === 'travelers' && val < 1)) {
-        err.style.display = 'block';
-        valid = false;
-      } else {
-        err.style.display = 'none';
-      }
-    });
+// CITIES
+const CITIES = [
+  "Abu Dhabi","Accra","Addis Ababa","Adelaide","Agra","Ahmedabad","Algiers","Almaty",
+  "Amsterdam","Anchorage","Ankara","Athens","Auckland","Austin","Baghdad","Baku",
+  "Bali","Bangkok","Barcelona","Beijing","Beirut","Belgrade","Berlin","Bogota",
+  "Bologna","Bordeaux","Brisbane","Brussels","Bucharest","Budapest","Buenos Aires",
+  "Cairo","Calgary","Cape Town","Casablanca","Chennai","Chicago","Chongqing","Colombo",
+  "Copenhagen","Dakar","Dallas","Dar es Salaam","Delhi","Denver","Dhaka","Doha",
+  "Dubai","Dublin","Durban","Edinburgh","Florence","Frankfurt","Geneva","Glasgow",
+  "Guangzhou","Guatemala City","Hamburg","Hanoi","Havana","Helsinki","Ho Chi Minh City",
+  "Hong Kong","Honolulu","Houston","Hyderabad","Istanbul","Jakarta","Jeddah",
+  "Johannesburg","Karachi","Kathmandu","Kinshasa","Kuala Lumpur","Kuwait City",
+  "Lagos","Lahore","Las Vegas","Lima","Lisbon","London","Los Angeles","Luanda",
+  "Luxembourg City","Lyon","Madrid","Manila","Marseille","Medellin","Melbourne",
+  "Mexico City","Miami","Milan","Minneapolis","Montreal","Moscow","Mumbai",
+  "Munich","Nairobi","Naples","New York City","Nice","Osaka","Oslo","Ottawa",
+  "Panama City","Paris","Perth","Philadelphia","Phnom Penh","Prague","Pune",
+  "Riyadh","Rome","San Francisco","Santiago","Sao Paulo","Seattle","Seoul",
+  "Shanghai","Singapore","Sofia","Stockholm","Sydney","Taipei","Tehran","Tel Aviv",
+  "Tokyo","Toronto","Vancouver","Vienna","Warsaw","Washington DC","Waterloo","Wellington","Zurich",
+  "Calgary, AB","Edmonton, AB","Halifax, NS","Kelowna, BC","Kingston, ON","London, ON",
+  "Mississauga, ON","Montreal, QC","Ottawa, ON","Quebec City, QC","Regina, SK",
+  "Saskatoon, SK","Toronto, ON","Vancouver, BC","Victoria, BC","Waterloo, ON",
+  "Winnipeg, MB","Windsor, ON",
+  "Atlanta, GA","Austin, TX","Boston, MA","Charlotte, NC","Dallas, TX","Denver, CO",
+  "Houston, TX","Las Vegas, NV","Los Angeles, CA","Miami, FL","Minneapolis, MN",
+  "Nashville, TN","New Orleans, LA","New York, NY","Orlando, FL","Philadelphia, PA",
+  "Phoenix, AZ","Portland, OR","San Diego, CA","San Francisco, CA","Seattle, WA","Washington, DC",
+];
+const cityOk = {};
+const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g,'');
 
-    // Check end date is after start date
-    const start = document.getElementById('startDate').value;
-    const end = document.getElementById('endDate').value;
-    if (start && end && end <= start) {
-      document.getElementById('err-endDate').textContent = 'End date must be after start date';
-      document.getElementById('err-endDate').style.display = 'block';
-      valid = false;
+function acCity(inp, listId, fid) {
+  const v = inp.value.trim(); cityOk[fid] = false;
+  const list = document.getElementById(listId);
+  if (v.length < 2) { list.innerHTML = ''; return; }
+  const m = CITIES.filter(c => c.toLowerCase().includes(v.toLowerCase())).slice(0,8);
+  list.innerHTML = m.map(c =>
+    `<div onmousedown="pickCity(event,'${c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${listId}','${fid}')">${c}</div>`
+  ).join('');
+}
+function pickCity(e, city, listId, fid) {
+  e.preventDefault();
+  document.getElementById(fid).value = city;
+  document.getElementById(listId).innerHTML = '';
+  cityOk[fid] = true; hideE(fid);
+  document.getElementById(fid).classList.remove('invalid');
+}
+document.addEventListener('click', e => {
+  ['ac-origin','ac-destination'].forEach(id => {
+    const el = document.getElementById(id), inp = document.getElementById(id.replace('ac-',''));
+    if (el && !el.contains(e.target) && e.target !== inp) el.innerHTML = '';
+  });
+  const cal = document.getElementById('calPop'), trig = document.getElementById('dateTrig');
+  if (cal.classList.contains('open') && !cal.contains(e.target) && !trig.contains(e.target)) calClose();
+});
+
+// CALENDAR
+let calOff = 0, selS = null, selE = null;
+
+function toggleCal(e) {
+  e.stopPropagation();
+  const cal = document.getElementById('calPop'), trig = document.getElementById('dateTrig');
+  if (cal.classList.contains('open')) { calClose(); return; }
+  const r = trig.getBoundingClientRect();
+  const calH = 250; // estimated calendar height
+  // Smart vertical position: below trigger if enough room, otherwise above
+  if (window.innerHeight - r.bottom - 8 >= calH) {
+    cal.style.top = (r.bottom + 6) + 'px';
+  } else {
+    cal.style.top = Math.max(8, r.top - calH - 6) + 'px';
+  }
+  let left = r.left;
+  left = Math.max(8, Math.min(left, window.innerWidth - 246));
+  cal.style.left = left + 'px';
+  cal.classList.add('open'); trig.classList.add('open');
+  renderCal();
+}
+function calClose() {
+  document.getElementById('calPop').classList.remove('open');
+  document.getElementById('dateTrig').classList.remove('open');
+}
+function calShift(d) { calOff += d; renderCal(); }
+function calClear() {
+  selS = null; selE = null;
+  document.getElementById('dStart').textContent = 'Add date'; document.getElementById('dStart').className = 'ds-val ph';
+  document.getElementById('dEnd').textContent = 'Add date'; document.getElementById('dEnd').className = 'ds-val ph';
+  renderCal();
+}
+const fmtD = d => d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+const sameD = (a,b) => a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+
+function renderCal() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const m = new Date(today.getFullYear(), today.getMonth()+calOff, 1);
+  document.getElementById('calLbl').textContent = m.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const y=m.getFullYear(), mo=m.getMonth(), fd=new Date(y,mo,1).getDay(), days=new Date(y,mo+1,0).getDate();
+  const dows=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let h='';
+  dows.forEach(d => { h += `<div class="cal-dow">${d}</div>`; });
+  for(let i=0;i<fd;i++) h += `<div class="cal-day emp"></div>`;
+  for(let d=1;d<=days;d++){
+    const dt=new Date(y,mo,d), past=dt<today;
+    let cls='cal-day';
+    if(past) cls+=' dis';
+    else {
+      if(sameD(dt,selS)) cls+=' rs';
+      if(sameD(dt,selE)) cls+=' re';
+      if(selS&&selE&&dt>selS&&dt<selE) cls+=' inr';
     }
-
-    return valid;
+    h += `<div class="${cls}" ${past?'':` onclick="calPick(${y},${mo},${d})"`}>${d}</div>`;
   }
+  document.getElementById('calGrid').innerHTML = h;
+}
 
-  function goToSummary() {
-    if (!validate()) return;
-
-    const get = id => document.getElementById(id).value || '—';
-    const labels = {
-      origin: 'Origin',
-      destination: 'Destination',
-      startDate: 'Start Date',
-      endDate: 'End Date',
-      travelers: 'Travelers',
-      budget: 'Budget (CAD)',
-      travelStyle: 'Travel Style',
-      accommodation: 'Accommodation',
-      transport: 'Transport',
-      food: 'Food Preference',
-      mustSee: 'Must-see / Special Needs'
-    };
-
-    let html = '';
-    const required = ['origin', 'destination', 'startDate', 'endDate', 'travelers', 'budget'];
-    for (const [id, label] of Object.entries(labels)) {
-      const val = get(id);
-      if (val !== '—' || required.includes(id)) {
-        html += `<div class="summary-row">
-          <span class="summary-key">${label}</span>
-          <span class="summary-val">${val}</span>
-        </div>`;
-      }
+function calPick(y, mo, d) {
+  const dt = new Date(y, mo, d);
+  if (!selS || (selS && selE)) {
+    // First click: set check-in, show immediately
+    selS = dt; selE = null;
+    document.getElementById('dStart').textContent = fmtD(selS);
+    document.getElementById('dStart').className = 'ds-val';
+    document.getElementById('dEnd').textContent = 'Add date';
+    document.getElementById('dEnd').className = 'ds-val ph';
+  } else {
+    if (dt <= selS) {
+      // Restart if clicked same or earlier date
+      selS = dt; selE = null;
+      document.getElementById('dStart').textContent = fmtD(selS);
+      document.getElementById('dStart').className = 'ds-val';
+      document.getElementById('dEnd').textContent = 'Add date';
+      document.getElementById('dEnd').className = 'ds-val ph';
+    } else {
+      // Second click: set check-out, auto-close
+      selE = dt;
+      document.getElementById('dEnd').textContent = fmtD(selE);
+      document.getElementById('dEnd').className = 'ds-val';
+      hideE('dates');
+      setTimeout(calClose, 350);
     }
-
-    document.getElementById('summaryContent').innerHTML = html;
-    document.getElementById('formPage').style.display = 'none';
-    const sp = document.getElementById('summaryPage');
-    sp.style.display = 'block';
   }
+  renderCal();
+}
 
-  function goBack() {
-    document.getElementById('summaryPage').style.display = 'none';
-    document.getElementById('formPage').style.display = 'block';
-  }
+// PREFERENCES
+const STEPS = [
+  { id:'travelStyle',   title:'Travel Style',    desc:'How do you like to pace your trips?',           chips:['Relaxed','Moderate','Packed','Spontaneous'] },
+  { id:'accommodation', title:'Accommodation',   desc:'Where do you prefer to stay?',                  chips:['Luxury Hotel (5\u2605)','Hotel (3\u20134\u2605)','Boutique Hotel','Airbnb','Hostel','Camping / Glamping'] },
+  { id:'transportTo',   title:'Getting There',   desc:'How would you like to reach your destination?', chips:['Economy Flight','Business Flight','Train','Bus / Coach','Drive','Carpool'] },
+  { id:'transportLoc',  title:'Getting Around',  desc:'How do you prefer to move around locally?',     chips:['Public Transit','Rental Car','Rideshare','Bike / E-Bike','Walk everywhere','Taxi'] },
+  { id:'food',          title:'Food & Dining',   desc:'Any dietary needs or dining preferences?',      chips:['Local & Street Food','Fine Dining','Vegetarian','Vegan','Halal','Kosher','Gluten-Free'] },
+  { id:'tripFocus',     title:'Trip Focus',      desc:'What do you most want to do?',                  chips:['Culture & Museums','Nature & Outdoors','Adventure & Sports','Beach & Relaxation','Nightlife','Food Tour','Shopping','Family-friendly','Romance'] },
+  { id:'climate',       title:'Climate',         desc:'What kind of weather suits you best?',          chips:['Warm & Sunny','Cool & Mild','Cold / Snow','Tropical','Dry / Desert'] },
+  { id:'visa',          title:'Passport',        desc:'Which passport will you be travelling on?',     chips:['Canadian','US','EU','Chinese','Other'] },
+  { id:'mustSee',       title:'Anything Else?',  desc:'Must-sees, special needs, or notes for our agents.', isText:true, placeholder:'e.g. F1 Grand Prix on Saturday, wheelchair accessible' },
+];
+const selPrefs = {};
+let curPref = 0, prefReady = false;
 
-  function confirmTrip() {
-    alert('Trip confirmed! Data will be passed to the next Agent.');
+function buildPrefs() {
+  const vp = document.getElementById('prefViewport');
+  vp.innerHTML = STEPS.map((s,i) => {
+    if (s.isText) {
+      const v = selPrefs[s.id] || '';
+      return `<div class="pref-step" id="ps${i}"><input class="pref-text-in" id="prefTxt" type="text" placeholder="${s.placeholder||''}" value="${v}"></div>`;
+    }
+    const chips = s.chips.map(lbl => {
+      const on = (selPrefs[s.id]||[]).includes(lbl) ? ' selected':'';
+      return `<div class="chip${on}" data-si="${i}" data-lbl="${lbl}">${lbl}</div>`;
+    }).join('');
+    return `<div class="pref-step" id="ps${i}"><div class="chip-group">${chips}</div></div>`;
+  }).join('');
+
+  vp.addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    chip.classList.toggle('selected');
+    const si=parseInt(chip.dataset.si), lbl=chip.dataset.lbl, id=STEPS[si].id;
+    if (!selPrefs[id]) selPrefs[id]=[];
+    if (chip.classList.contains('selected')) { if(!selPrefs[id].includes(lbl)) selPrefs[id].push(lbl); }
+    else selPrefs[id]=selPrefs[id].filter(l=>l!==lbl);
+  });
+  prefReady = true;
+  showStep(0, false);
+}
+
+function showStep(index, animate=true) {
+  const dir = index >= curPref ? 'slide-r' : 'slide-l';
+  document.querySelectorAll('.pref-step').forEach(s => s.classList.remove('active','slide-r','slide-l'));
+  const target = document.getElementById('ps'+index);
+  if (animate) {
+    target.classList.add('active', dir);
+    target.addEventListener('animationend', () => target.classList.remove(dir), {once:true});
+  } else { target.classList.add('active'); }
+  curPref = index;
+  const s = STEPS[index], total = STEPS.length;
+  document.getElementById('prefFill').style.width = `${(index/total)*100}%`;
+  const li = document.getElementById('prefLI');
+  if (animate) {
+    li.classList.add('fading');
+    setTimeout(() => {
+      document.getElementById('prefNum').textContent = `${index+1} of ${total}`;
+      document.getElementById('prefTitle').textContent = s.title;
+      document.getElementById('prefDesc').textContent = s.desc;
+      li.classList.remove('fading');
+    }, 220);
+  } else {
+    document.getElementById('prefNum').textContent = `${index+1} of ${total}`;
+    document.getElementById('prefTitle').textContent = s.title;
+    document.getElementById('prefDesc').textContent = s.desc;
   }
+  document.getElementById('prefBack').textContent = index===0 ? '\u2190 Edit Trip' : '\u2190 Back';
+  document.getElementById('prefNext').textContent = index===total-1 ? 'Review Trip \u2713' : 'Next \u2192';
+  if (s.isText) setTimeout(()=>{ const inp=document.getElementById('prefTxt'); if(inp)inp.focus(); }, 400);
+}
+
+function saveCurText() {
+  if (STEPS[curPref].isText) { const inp=document.getElementById('prefTxt'); if(inp) selPrefs[STEPS[curPref].id]=inp.value; }
+}
+function nextPref() { saveCurText(); curPref<STEPS.length-1 ? showStep(curPref+1) : finishPrefs(); }
+function prevPref() { saveCurText(); curPref>0 ? showStep(curPref-1) : showPage('form-section'); }
+function skipPref() {
+  delete selPrefs[STEPS[curPref].id];
+  const step=document.getElementById('ps'+curPref);
+  if(step) step.querySelectorAll('.chip.selected').forEach(c=>c.classList.remove('selected'));
+  curPref<STEPS.length-1 ? showStep(curPref+1) : finishPrefs();
+}
+function finishPrefs() { saveCurText(); buildSummary(); showPage('summary-section'); }
+
+function buildSummary() {
+  const get = id => { const el=document.getElementById(id); return el?el.value||null:null; };
+  let html='';
+  const row=(k,v)=>{ if(v) html+=`<div class="sum-row"><span class="sum-k">${k}</span><span class="sum-v">${v}</span></div>`; };
+  row('Origin',get('origin')); row('Destination',get('destination'));
+  row('Start Date',selS?fmtD(selS):null); row('End Date',selE?fmtD(selE):null);
+  row('Travelers',get('travelers'));
+  row('Budget (CAD)',get('budget')?'$'+get('budget'):null);
+  const map={travelStyle:'Travel Style',accommodation:'Accommodation',transportTo:'Getting There',
+    transportLoc:'Getting Around',food:'Food & Dining',tripFocus:'Trip Focus',
+    climate:'Climate',visa:'Passport',mustSee:'Must-see'};
+  Object.entries(map).forEach(([id,lbl])=>{
+    const v=selPrefs[id]; if(v&&(Array.isArray(v)?v.length:v)) row(lbl,Array.isArray(v)?v.join(', '):v);
+  });
+  document.getElementById('sumContent').innerHTML=html;
+}
+
+// VALIDATION
+function clamp(inp,min){if(inp.value!==''&&Number(inp.value)<min)inp.value=min;}
+function showE(id,msg){const e=document.getElementById('err-'+id);if(msg)e.textContent=msg;e.classList.add('show');}
+function hideE(id){document.getElementById('err-'+id).classList.remove('show');}
+
+function validate(){
+  let ok=true;
+  const ov=document.getElementById('origin').value.trim();
+  const ovOk=cityOk['origin']||CITIES.map(c=>c.toLowerCase()).includes(ov.toLowerCase());
+  if(!ov||!ovOk){showE('origin','Please select a valid city from the list');ok=false;document.getElementById('origin').classList.add('invalid');}
+  else{cityOk['origin']=true;hideE('origin');document.getElementById('origin').classList.remove('invalid');}
+  const dv=document.getElementById('destination').value.trim();
+  const dvOk=cityOk['destination']||CITIES.map(c=>c.toLowerCase()).includes(dv.toLowerCase());
+  if(!dv||!dvOk){showE('destination','Please select a valid city from the list');ok=false;document.getElementById('destination').classList.add('invalid');}
+  else{cityOk['destination']=true;hideE('destination');document.getElementById('destination').classList.remove('invalid');}
+  if(cityOk['origin']&&cityOk['destination']&&norm(ov)===norm(dv)){showE('destination','Destination must differ from origin');ok=false;document.getElementById('destination').classList.add('invalid');}
+  if(!selS||!selE){showE('dates','Please select your travel dates');ok=false;}else hideE('dates');
+  const tr=document.getElementById('travelers').value;
+  if(!tr||Number(tr)<1){showE('travelers','Must be at least 1 traveler');ok=false;}else hideE('travelers');
+  const bu=document.getElementById('budget').value;
+  if(bu===''||Number(bu)<0){showE('budget','Budget cannot be negative');ok=false;}else hideE('budget');
+  return ok;
+}
+
+function goToPrefs(){
+  if(!validate()) return;
+  showPage('pref-section');
+  if(!prefReady) buildPrefs(); else showStep(0,false);
+}
+function goEditPrefs(){
+  showPage('pref-section');
+  if(prefReady) showStep(STEPS.length-1,false);
+}
+function confirmTrip(){ showPage('confirmed-section'); }
 </script>
-
 </body>
 </html>
