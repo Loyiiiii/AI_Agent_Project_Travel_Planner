@@ -9,16 +9,12 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --sand:#F7F3EE; --stone:#E8E0D5; --ink:#1C1917;
-      --mist:#6B6560; --accent:#2D5F8A; --error:#B85450; --white:#FFFFFF;
+      --mist:#6B6560; --accent:#2D5F8A; --error:#B85450;
     }
     html, body { height: 100%; }
     body { font-family:'Inter',sans-serif; background:var(--ink); overflow:hidden; }
 
-    .section {
-      display:none; height:100vh; width:100%;
-      align-items:center; justify-content:center;
-      position:relative; overflow:hidden;
-    }
+    .section { display:none; height:100vh; width:100%; align-items:center; justify-content:center; position:relative; overflow:hidden; }
     .section.active { display:flex; }
 
     /* HERO */
@@ -33,7 +29,7 @@
     .btn-hero { display:inline-flex; align-items:center; gap:10px; padding:16px 36px; background:#fff; color:var(--ink); font-size:13px; font-weight:600; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s,color .2s; font-family:inherit; }
     .btn-hero:hover { background:var(--accent); color:#fff; }
 
-    /* SPLIT LAYOUT */
+    /* SPLIT */
     .split { display:grid; grid-template-columns:1fr 1.55fr; width:100%; max-width:1100px; height:100vh; }
     .sl { display:flex; flex-direction:column; justify-content:center; padding:80px 56px; border-right:1px solid var(--stone); overflow:hidden; }
     .sr { display:flex; flex-direction:column; justify-content:center; padding:60px 56px; overflow-y:auto; }
@@ -47,6 +43,7 @@
     .group-label { font-size:10px; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; color:var(--mist); margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--stone); }
     .g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
     .field { display:flex; flex-direction:column; gap:6px; position:relative; }
+    .field.full { grid-column:1/-1; }
     label { font-size:11px; font-weight:500; letter-spacing:.5px; color:var(--mist); text-transform:uppercase; }
     input[type="text"], input[type="number"] { padding:12px 0; border:none; border-bottom:1.5px solid var(--stone); background:transparent; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); outline:none; transition:border-color .2s; width:100%; border-radius:0; }
     input:focus { border-bottom-color:var(--accent); }
@@ -54,6 +51,12 @@
     input.invalid { border-bottom-color:var(--error); }
     .ferr { font-size:11px; color:var(--error); display:none; margin-top:2px; }
     .ferr.show { display:block; }
+
+    /* Select wrap (styled like inputs) */
+    .select-wrap { position:relative; border-bottom:1.5px solid var(--stone); transition:border-color .2s; }
+    .select-wrap:focus-within { border-bottom-color:var(--accent); }
+    .select-wrap select { display:block; width:100%; padding:12px 20px 12px 0; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:14px; color:var(--ink); outline:none; appearance:none; -webkit-appearance:none; cursor:pointer; border-radius:0; }
+    .select-wrap::after { content:''; position:absolute; right:4px; top:50%; transform:translateY(-50%); width:10px; height:6px; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B6560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center; pointer-events:none; }
 
     /* Autocomplete */
     .ac-list { position:absolute; top:100%; left:0; right:0; z-index:9999; background:#fff; border:1px solid var(--stone); border-top:none; max-height:180px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,.1); }
@@ -69,7 +72,7 @@
     .ds-val.ph { color:#C4BDB6; font-weight:300; }
     .ds-div { width:1px; background:var(--stone); margin:0 20px; }
 
-    /* CALENDAR — compact, fixed position */
+    /* CALENDAR */
     .cal { display:none; position:fixed; z-index:99999; background:#fff; border:1px solid var(--stone); box-shadow:0 12px 40px rgba(0,0,0,.15); border-radius:6px; padding:10px; width:238px; }
     .cal.open { display:block; }
     .cal-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -101,33 +104,40 @@
     .pref-li { transition:opacity .25s ease, transform .25s ease; }
     .pref-li.fading { opacity:0; transform:translateY(10px); }
     .pref-note { font-size:11px; color:rgba(255,255,255,.25); margin-top:20px; }
-    .pref-sr { justify-content:space-between; }
-    .pref-viewport { flex:1; display:flex; align-items:center; overflow:hidden; }
-    .pref-step { display:none; width:100%; }
-    .pref-step.active { display:block; }
-    .pref-step.slide-r { animation:slideR .35s cubic-bezier(.4,0,.2,1); }
-    .pref-step.slide-l { animation:slideL .35s cubic-bezier(.4,0,.2,1); }
+    .pref-sr { justify-content:space-between; overflow:hidden; }
+    .pref-viewport { flex:1; overflow-y:auto; padding-right:2px; min-height:0; }
+
+    /* Pref pages */
+    .pref-page { display:none; width:100%; padding-bottom:8px; }
+    .pref-page.active { display:block; }
+    .pref-page.slide-r { animation:slideR .35s cubic-bezier(.4,0,.2,1); }
+    .pref-page.slide-l { animation:slideL .35s cubic-bezier(.4,0,.2,1); }
     @keyframes slideR { from{opacity:0;transform:translateX(32px)} to{opacity:1;transform:none} }
     @keyframes slideL { from{opacity:0;transform:translateX(-32px)} to{opacity:1;transform:none} }
 
-    /* Chips */
-    .chip-group { display:flex; flex-wrap:wrap; gap:10px; }
-    .chip { padding:9px 16px; border:1.5px solid var(--stone); border-radius:100px; font-size:13px; font-weight:500; color:var(--mist); cursor:pointer; transition:all .15s; user-select:none; }
+    /* Chip groups within a pref page */
+    .pref-group { margin-bottom:22px; }
+    .pref-group:last-child { margin-bottom:0; }
+    .pref-group-lbl { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--mist); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--stone); }
+    .chip-group { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip { padding:8px 15px; border:1.5px solid var(--stone); border-radius:100px; font-size:12px; font-weight:500; color:var(--mist); cursor:pointer; transition:all .15s; user-select:none; }
     .chip:hover { border-color:var(--accent); color:var(--accent); }
     .chip.selected { border-color:var(--accent); background:var(--accent); color:#fff; }
+
     .pref-text-in { width:100%; padding:14px 0; border:none; border-bottom:1.5px solid var(--stone); font-family:'Inter',sans-serif; font-size:16px; color:var(--ink); background:transparent; outline:none; transition:border-color .2s; border-radius:0; }
     .pref-text-in:focus { border-bottom-color:var(--accent); }
     .pref-text-in::placeholder { color:#C4BDB6; font-weight:300; }
-    .pref-nav { display:flex; align-items:center; gap:12px; padding:24px 0 0; border-top:1px solid var(--stone); }
-    .btn-pb { padding:13px 20px; background:transparent; color:var(--mist); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:1.5px solid var(--stone); border-radius:2px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+
+    .pref-nav { display:flex; align-items:center; gap:12px; padding:20px 0 0; border-top:1px solid var(--stone); flex-shrink:0; }
+    .btn-pb { padding:12px 18px; background:transparent; color:var(--mist); font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:1.5px solid var(--stone); border-radius:2px; cursor:pointer; transition:all .2s; white-space:nowrap; }
     .btn-pb:hover { border-color:var(--ink); color:var(--ink); }
-    .btn-ps { padding:13px 0; background:none; color:#B0A9A2; font-family:'Inter',sans-serif; font-size:11px; font-weight:500; letter-spacing:1px; text-transform:uppercase; border:none; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+    .btn-ps { padding:12px 0; background:none; color:#B0A9A2; font-family:'Inter',sans-serif; font-size:11px; font-weight:500; letter-spacing:1px; text-transform:uppercase; border:none; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
     .btn-ps:hover { color:var(--mist); }
-    .btn-pn { flex:1; padding:13px 24px; background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
+    .btn-pn { flex:1; padding:12px 24px; background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
     .btn-pn:hover { background:var(--accent); }
 
     /* Submit */
-    .btn-sub { width:100%; margin-top:32px; padding:15px 24px; background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
+    .btn-sub { width:100%; margin-top:28px; padding:15px 24px; background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
     .btn-sub:hover { background:var(--accent); }
 
     /* SUMMARY */
@@ -136,14 +146,14 @@
     .sum-sl .step-eyebrow { color:rgba(255,255,255,.35); }
     .sum-sl .split-h { color:#fff; }
     .sum-sl .split-p { color:rgba(255,255,255,.45); }
-    .sum-row { display:flex; justify-content:space-between; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--stone); gap:24px; }
+    .sum-row { display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid var(--stone); gap:24px; }
     .sum-row:last-of-type { border-bottom:none; }
     .sum-k { font-size:11px; font-weight:500; letter-spacing:1px; text-transform:uppercase; color:var(--mist); white-space:nowrap; }
-    .sum-v { font-family:'Cormorant Garamond',serif; font-size:19px; color:var(--ink); text-align:right; }
-    .sum-acts { display:flex; gap:12px; margin-top:40px; }
-    .btn-edit { padding:15px 24px; background:transparent; color:var(--mist); font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:1.5px solid var(--stone); border-radius:2px; cursor:pointer; transition:all .2s; }
+    .sum-v { font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--ink); text-align:right; }
+    .sum-acts { display:flex; gap:12px; margin-top:36px; }
+    .btn-edit { padding:14px 22px; background:transparent; color:var(--mist); font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:1.5px solid var(--stone); border-radius:2px; cursor:pointer; transition:all .2s; }
     .btn-edit:hover { border-color:var(--ink); color:var(--ink); }
-    .btn-cfm { flex:1; padding:15px 24px; background:var(--accent); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
+    .btn-cfm { flex:1; padding:14px 22px; background:var(--accent); color:#fff; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; border:none; border-radius:2px; cursor:pointer; transition:background .2s; }
     .btn-cfm:hover { background:var(--ink); }
 
     /* CONFIRMED */
@@ -185,6 +195,7 @@
       <p class="split-p">Fill in the required fields. We'll ask about your preferences next.</p>
     </div>
     <div class="sr">
+
       <div class="field-group">
         <div class="group-label">Where & When</div>
         <div class="g2">
@@ -215,13 +226,17 @@
       <div class="field-group">
         <div class="group-label">Travelers & Budget</div>
         <div class="g2">
-          <div class="field">
+          <div class="field full">
             <label>Number of Travelers</label>
             <input type="number" id="travelers" min="1" placeholder="1" oninput="clamp(this,1)">
             <span class="ferr" id="err-travelers">Must be at least 1</span>
           </div>
           <div class="field">
-            <label>Budget (CAD)</label>
+            <label>Currency</label>
+            <div class="select-wrap"><select id="currency"></select></div>
+          </div>
+          <div class="field">
+            <label>Budget Amount</label>
             <input type="number" id="budget" min="0" placeholder="e.g. 1500" oninput="clamp(this,0)">
             <span class="ferr" id="err-budget">Must be 0 or more</span>
           </div>
@@ -239,10 +254,10 @@
   <div class="split">
     <div class="sl pref-sl">
       <div class="pref-li" id="prefLI">
-        <p class="step-eyebrow" id="prefNum">1 of 9</p>
+        <p class="step-eyebrow" id="prefNum">1 of 3</p>
         <h2 class="split-h" id="prefTitle"></h2>
         <p class="split-p" id="prefDesc"></p>
-        <p class="pref-note">Optional — select all that apply</p>
+        <p class="pref-note" id="prefNote">Optional — select all that apply</p>
       </div>
     </div>
     <div class="sr pref-sr">
@@ -256,7 +271,7 @@
   </div>
 </section>
 
-<!-- Calendar — fixed at document root -->
+<!-- Calendar -->
 <div class="cal" id="calPop">
   <div class="cal-hdr">
     <button class="cal-nav-btn" onclick="calShift(-1)">&#8249;</button>
@@ -298,13 +313,77 @@
 </section>
 
 <script>
-// PAGE NAV
+// ── PAGE NAV ─────────────────────────────────────
 function showPage(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// CITIES
+// ── CURRENCIES ───────────────────────────────────
+const CURRENCIES = [
+  {code:'AED',name:'UAE Dirham'},{code:'AFN',name:'Afghan Afghani'},{code:'ALL',name:'Albanian Lek'},
+  {code:'AMD',name:'Armenian Dram'},{code:'ANG',name:'Netherlands Antillean Guilder'},{code:'AOA',name:'Angolan Kwanza'},
+  {code:'ARS',name:'Argentine Peso'},{code:'AUD',name:'Australian Dollar'},{code:'AWG',name:'Aruban Florin'},
+  {code:'AZN',name:'Azerbaijani Manat'},{code:'BAM',name:'Bosnia-Herzegovina Mark'},{code:'BBD',name:'Barbadian Dollar'},
+  {code:'BDT',name:'Bangladeshi Taka'},{code:'BGN',name:'Bulgarian Lev'},{code:'BHD',name:'Bahraini Dinar'},
+  {code:'BIF',name:'Burundian Franc'},{code:'BMD',name:'Bermudan Dollar'},{code:'BND',name:'Brunei Dollar'},
+  {code:'BOB',name:'Bolivian Boliviano'},{code:'BRL',name:'Brazilian Real'},{code:'BSD',name:'Bahamian Dollar'},
+  {code:'BTN',name:'Bhutanese Ngultrum'},{code:'BWP',name:'Botswanan Pula'},{code:'BYN',name:'Belarusian Ruble'},
+  {code:'BZD',name:'Belize Dollar'},{code:'CAD',name:'Canadian Dollar'},{code:'CDF',name:'Congolese Franc'},
+  {code:'CHF',name:'Swiss Franc'},{code:'CLP',name:'Chilean Peso'},{code:'CNY',name:'Chinese Yuan'},
+  {code:'COP',name:'Colombian Peso'},{code:'CRC',name:'Costa Rican Colón'},{code:'CUP',name:'Cuban Peso'},
+  {code:'CVE',name:'Cape Verdean Escudo'},{code:'CZK',name:'Czech Koruna'},{code:'DJF',name:'Djiboutian Franc'},
+  {code:'DKK',name:'Danish Krone'},{code:'DOP',name:'Dominican Peso'},{code:'DZD',name:'Algerian Dinar'},
+  {code:'EGP',name:'Egyptian Pound'},{code:'ERN',name:'Eritrean Nakfa'},{code:'ETB',name:'Ethiopian Birr'},
+  {code:'EUR',name:'Euro'},{code:'FJD',name:'Fijian Dollar'},{code:'FKP',name:'Falkland Islands Pound'},
+  {code:'GBP',name:'British Pound'},{code:'GEL',name:'Georgian Lari'},{code:'GHS',name:'Ghanaian Cedi'},
+  {code:'GIP',name:'Gibraltar Pound'},{code:'GMD',name:'Gambian Dalasi'},{code:'GNF',name:'Guinean Franc'},
+  {code:'GTQ',name:'Guatemalan Quetzal'},{code:'GYD',name:'Guyanaese Dollar'},{code:'HKD',name:'Hong Kong Dollar'},
+  {code:'HNL',name:'Honduran Lempira'},{code:'HRK',name:'Croatian Kuna'},{code:'HTG',name:'Haitian Gourde'},
+  {code:'HUF',name:'Hungarian Forint'},{code:'IDR',name:'Indonesian Rupiah'},{code:'ILS',name:'Israeli Shekel'},
+  {code:'INR',name:'Indian Rupee'},{code:'IQD',name:'Iraqi Dinar'},{code:'IRR',name:'Iranian Rial'},
+  {code:'ISK',name:'Icelandic Króna'},{code:'JMD',name:'Jamaican Dollar'},{code:'JOD',name:'Jordanian Dinar'},
+  {code:'JPY',name:'Japanese Yen'},{code:'KES',name:'Kenyan Shilling'},{code:'KGS',name:'Kyrgystani Som'},
+  {code:'KHR',name:'Cambodian Riel'},{code:'KMF',name:'Comorian Franc'},{code:'KPW',name:'North Korean Won'},
+  {code:'KRW',name:'South Korean Won'},{code:'KWD',name:'Kuwaiti Dinar'},{code:'KYD',name:'Cayman Islands Dollar'},
+  {code:'KZT',name:'Kazakhstani Tenge'},{code:'LAK',name:'Laotian Kip'},{code:'LBP',name:'Lebanese Pound'},
+  {code:'LKR',name:'Sri Lankan Rupee'},{code:'LRD',name:'Liberian Dollar'},{code:'LSL',name:'Lesotho Loti'},
+  {code:'LYD',name:'Libyan Dinar'},{code:'MAD',name:'Moroccan Dirham'},{code:'MDL',name:'Moldovan Leu'},
+  {code:'MGA',name:'Malagasy Ariary'},{code:'MKD',name:'Macedonian Denar'},{code:'MMK',name:'Myanmar Kyat'},
+  {code:'MNT',name:'Mongolian Tugrik'},{code:'MOP',name:'Macanese Pataca'},{code:'MRU',name:'Mauritanian Ouguiya'},
+  {code:'MUR',name:'Mauritian Rupee'},{code:'MVR',name:'Maldivian Rufiyaa'},{code:'MWK',name:'Malawian Kwacha'},
+  {code:'MXN',name:'Mexican Peso'},{code:'MYR',name:'Malaysian Ringgit'},{code:'MZN',name:'Mozambican Metical'},
+  {code:'NAD',name:'Namibian Dollar'},{code:'NGN',name:'Nigerian Naira'},{code:'NIO',name:'Nicaraguan Córdoba'},
+  {code:'NOK',name:'Norwegian Krone'},{code:'NPR',name:'Nepalese Rupee'},{code:'NZD',name:'New Zealand Dollar'},
+  {code:'OMR',name:'Omani Rial'},{code:'PAB',name:'Panamanian Balboa'},{code:'PEN',name:'Peruvian Sol'},
+  {code:'PGK',name:'Papua New Guinean Kina'},{code:'PHP',name:'Philippine Peso'},{code:'PKR',name:'Pakistani Rupee'},
+  {code:'PLN',name:'Polish Zloty'},{code:'PYG',name:'Paraguayan Guarani'},{code:'QAR',name:'Qatari Rial'},
+  {code:'RON',name:'Romanian Leu'},{code:'RSD',name:'Serbian Dinar'},{code:'RUB',name:'Russian Ruble'},
+  {code:'RWF',name:'Rwandan Franc'},{code:'SAR',name:'Saudi Riyal'},{code:'SBD',name:'Solomon Islands Dollar'},
+  {code:'SCR',name:'Seychellois Rupee'},{code:'SDG',name:'Sudanese Pound'},{code:'SEK',name:'Swedish Krona'},
+  {code:'SGD',name:'Singapore Dollar'},{code:'SHP',name:'Saint Helena Pound'},{code:'SLL',name:'Sierra Leonean Leone'},
+  {code:'SOS',name:'Somali Shilling'},{code:'SRD',name:'Surinamese Dollar'},{code:'STN',name:'São Tomé Dobra'},
+  {code:'SYP',name:'Syrian Pound'},{code:'SZL',name:'Swazi Lilangeni'},{code:'THB',name:'Thai Baht'},
+  {code:'TJS',name:'Tajikistani Somoni'},{code:'TMT',name:'Turkmenistani Manat'},{code:'TND',name:'Tunisian Dinar'},
+  {code:'TOP',name:'Tongan Paʻanga'},{code:'TRY',name:'Turkish Lira'},{code:'TTD',name:'Trinidad & Tobago Dollar'},
+  {code:'TWD',name:'Taiwan Dollar'},{code:'TZS',name:'Tanzanian Shilling'},{code:'UAH',name:'Ukrainian Hryvnia'},
+  {code:'UGX',name:'Ugandan Shilling'},{code:'USD',name:'US Dollar'},{code:'UYU',name:'Uruguayan Peso'},
+  {code:'UZS',name:'Uzbekistani Som'},{code:'VES',name:'Venezuelan Bolívar'},{code:'VND',name:'Vietnamese Dong'},
+  {code:'VUV',name:'Vanuatu Vatu'},{code:'WST',name:'Samoan Tala'},{code:'XAF',name:'Central African CFA Franc'},
+  {code:'XCD',name:'East Caribbean Dollar'},{code:'XOF',name:'West African CFA Franc'},{code:'XPF',name:'CFP Franc'},
+  {code:'YER',name:'Yemeni Rial'},{code:'ZAR',name:'South African Rand'},{code:'ZMW',name:'Zambian Kwacha'},
+  {code:'ZWL',name:'Zimbabwean Dollar'},
+];
+
+// Populate currency select on load
+window.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('currency');
+  sel.innerHTML = CURRENCIES.map(c =>
+    `<option value="${c.code}"${c.code==='CAD'?' selected':''}>${c.code} — ${c.name}</option>`
+  ).join('');
+});
+
+// ── CITIES ───────────────────────────────────────
 const CITIES = [
   "Abu Dhabi","Accra","Addis Ababa","Adelaide","Agra","Ahmedabad","Algiers","Almaty",
   "Amsterdam","Anchorage","Ankara","Athens","Auckland","Austin","Baghdad","Baku",
@@ -326,8 +405,7 @@ const CITIES = [
   "Tokyo","Toronto","Vancouver","Vienna","Warsaw","Washington DC","Waterloo","Wellington","Zurich",
   "Calgary, AB","Edmonton, AB","Halifax, NS","Kelowna, BC","Kingston, ON","London, ON",
   "Mississauga, ON","Montreal, QC","Ottawa, ON","Quebec City, QC","Regina, SK",
-  "Saskatoon, SK","Toronto, ON","Vancouver, BC","Victoria, BC","Waterloo, ON",
-  "Winnipeg, MB","Windsor, ON",
+  "Saskatoon, SK","Toronto, ON","Vancouver, BC","Victoria, BC","Waterloo, ON","Winnipeg, MB","Windsor, ON",
   "Atlanta, GA","Austin, TX","Boston, MA","Charlotte, NC","Dallas, TX","Denver, CO",
   "Houston, TX","Las Vegas, NV","Los Angeles, CA","Miami, FL","Minneapolis, MN",
   "Nashville, TN","New Orleans, LA","New York, NY","Orlando, FL","Philadelphia, PA",
@@ -361,16 +439,14 @@ document.addEventListener('click', e => {
   if (cal.classList.contains('open') && !cal.contains(e.target) && !trig.contains(e.target)) calClose();
 });
 
-// CALENDAR
+// ── CALENDAR ─────────────────────────────────────
 let calOff = 0, selS = null, selE = null;
 
 function toggleCal(e) {
   e.stopPropagation();
   const cal = document.getElementById('calPop'), trig = document.getElementById('dateTrig');
   if (cal.classList.contains('open')) { calClose(); return; }
-  const r = trig.getBoundingClientRect();
-  const calH = 250; // estimated calendar height
-  // Smart vertical position: below trigger if enough room, otherwise above
+  const r = trig.getBoundingClientRect(), calH = 250;
   if (window.innerHeight - r.bottom - 8 >= calH) {
     cal.style.top = (r.bottom + 6) + 'px';
   } else {
@@ -401,46 +477,32 @@ function renderCal() {
   const m = new Date(today.getFullYear(), today.getMonth()+calOff, 1);
   document.getElementById('calLbl').textContent = m.toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const y=m.getFullYear(), mo=m.getMonth(), fd=new Date(y,mo,1).getDay(), days=new Date(y,mo+1,0).getDate();
-  const dows=['Su','Mo','Tu','We','Th','Fr','Sa'];
   let h='';
-  dows.forEach(d => { h += `<div class="cal-dow">${d}</div>`; });
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => { h += `<div class="cal-dow">${d}</div>`; });
   for(let i=0;i<fd;i++) h += `<div class="cal-day emp"></div>`;
   for(let d=1;d<=days;d++){
     const dt=new Date(y,mo,d), past=dt<today;
     let cls='cal-day';
     if(past) cls+=' dis';
-    else {
-      if(sameD(dt,selS)) cls+=' rs';
-      if(sameD(dt,selE)) cls+=' re';
-      if(selS&&selE&&dt>selS&&dt<selE) cls+=' inr';
-    }
+    else { if(sameD(dt,selS))cls+=' rs'; if(sameD(dt,selE))cls+=' re'; if(selS&&selE&&dt>selS&&dt<selE)cls+=' inr'; }
     h += `<div class="${cls}" ${past?'':` onclick="calPick(${y},${mo},${d})"`}>${d}</div>`;
   }
   document.getElementById('calGrid').innerHTML = h;
 }
-
 function calPick(y, mo, d) {
   const dt = new Date(y, mo, d);
   if (!selS || (selS && selE)) {
-    // First click: set check-in, show immediately
     selS = dt; selE = null;
-    document.getElementById('dStart').textContent = fmtD(selS);
-    document.getElementById('dStart').className = 'ds-val';
-    document.getElementById('dEnd').textContent = 'Add date';
-    document.getElementById('dEnd').className = 'ds-val ph';
+    document.getElementById('dStart').textContent = fmtD(selS); document.getElementById('dStart').className = 'ds-val';
+    document.getElementById('dEnd').textContent = 'Add date'; document.getElementById('dEnd').className = 'ds-val ph';
   } else {
     if (dt <= selS) {
-      // Restart if clicked same or earlier date
       selS = dt; selE = null;
-      document.getElementById('dStart').textContent = fmtD(selS);
-      document.getElementById('dStart').className = 'ds-val';
-      document.getElementById('dEnd').textContent = 'Add date';
-      document.getElementById('dEnd').className = 'ds-val ph';
+      document.getElementById('dStart').textContent = fmtD(selS); document.getElementById('dStart').className = 'ds-val';
+      document.getElementById('dEnd').textContent = 'Add date'; document.getElementById('dEnd').className = 'ds-val ph';
     } else {
-      // Second click: set check-out, auto-close
       selE = dt;
-      document.getElementById('dEnd').textContent = fmtD(selE);
-      document.getElementById('dEnd').className = 'ds-val';
+      document.getElementById('dEnd').textContent = fmtD(selE); document.getElementById('dEnd').className = 'ds-val';
       hideE('dates');
       setTimeout(calClose, 350);
     }
@@ -448,108 +510,152 @@ function calPick(y, mo, d) {
   renderCal();
 }
 
-// PREFERENCES
-const STEPS = [
-  { id:'travelStyle',   title:'Travel Style',    desc:'How do you like to pace your trips?',           chips:['Relaxed','Moderate','Packed','Spontaneous'] },
-  { id:'accommodation', title:'Accommodation',   desc:'Where do you prefer to stay?',                  chips:['Luxury Hotel (5\u2605)','Hotel (3\u20134\u2605)','Boutique Hotel','Airbnb','Hostel','Camping / Glamping'] },
-  { id:'transportTo',   title:'Getting There',   desc:'How would you like to reach your destination?', chips:['Economy Flight','Business Flight','Train','Bus / Coach','Drive','Carpool'] },
-  { id:'transportLoc',  title:'Getting Around',  desc:'How do you prefer to move around locally?',     chips:['Public Transit','Rental Car','Rideshare','Bike / E-Bike','Walk everywhere','Taxi'] },
-  { id:'food',          title:'Food & Dining',   desc:'Any dietary needs or dining preferences?',      chips:['Local & Street Food','Fine Dining','Vegetarian','Vegan','Halal','Kosher','Gluten-Free'] },
-  { id:'tripFocus',     title:'Trip Focus',      desc:'What do you most want to do?',                  chips:['Culture & Museums','Nature & Outdoors','Adventure & Sports','Beach & Relaxation','Nightlife','Food Tour','Shopping','Family-friendly','Romance'] },
-  { id:'climate',       title:'Climate',         desc:'What kind of weather suits you best?',          chips:['Warm & Sunny','Cool & Mild','Cold / Snow','Tropical','Dry / Desert'] },
-  { id:'visa',          title:'Passport',        desc:'Which passport will you be travelling on?',     chips:['Canadian','US','EU','Chinese','Other'] },
-  { id:'mustSee',       title:'Anything Else?',  desc:'Must-sees, special needs, or notes for our agents.', isText:true, placeholder:'e.g. F1 Grand Prix on Saturday, wheelchair accessible' },
+// ── PREFERENCES ──────────────────────────────────
+const PREF_PAGES = [
+  {
+    title: 'Travel & Stay',
+    desc: 'How you like to get there and where you sleep.',
+    groups: [
+      { id:'travelStyle',   label:'Travel Style',   chips:['Relaxed','Moderate','Packed','Spontaneous'] },
+      { id:'accommodation', label:'Accommodation',  chips:['Luxury Hotel (5\u2605)','Hotel (3\u20134\u2605)','Boutique Hotel','Airbnb','Hostel','Camping / Glamping'] },
+      { id:'transportTo',   label:'Getting There',  chips:['Economy Flight','Business Flight','Train','Bus / Coach','Drive','Carpool'] },
+    ]
+  },
+  {
+    title: 'Activities & Food',
+    desc: 'What you want to do and how you like to eat.',
+    groups: [
+      { id:'transportLoc', label:'Getting Around', chips:['Public Transit','Rental Car','Rideshare','Bike / E-Bike','Walk everywhere','Taxi'] },
+      { id:'food',         label:'Food & Dining',  chips:['Local & Street Food','Fine Dining','Vegetarian','Vegan','Halal','Kosher','Gluten-Free'] },
+      { id:'tripFocus',    label:'Trip Focus',     chips:['Culture & Museums','Nature & Outdoors','Adventure & Sports','Beach & Relaxation','Nightlife','Food Tour','Shopping','Family-friendly','Romance'] },
+    ]
+  },
+  {
+    title: 'Anything else?',
+    desc: 'Must-sees, special needs, or notes for our agents.',
+    isText: true,
+    textId: 'mustSee',
+    placeholder: 'e.g. F1 Grand Prix on Saturday, wheelchair accessible',
+  }
 ];
+
 const selPrefs = {};
 let curPref = 0, prefReady = false;
 
 function buildPrefs() {
   const vp = document.getElementById('prefViewport');
-  vp.innerHTML = STEPS.map((s,i) => {
-    if (s.isText) {
-      const v = selPrefs[s.id] || '';
-      return `<div class="pref-step" id="ps${i}"><input class="pref-text-in" id="prefTxt" type="text" placeholder="${s.placeholder||''}" value="${v}"></div>`;
+  vp.innerHTML = PREF_PAGES.map((page, i) => {
+    if (page.isText) {
+      const v = selPrefs[page.textId] || '';
+      return `<div class="pref-page" id="pp${i}">
+        <input class="pref-text-in" id="prefTxt" type="text" placeholder="${page.placeholder||''}" value="${v}">
+      </div>`;
     }
-    const chips = s.chips.map(lbl => {
-      const on = (selPrefs[s.id]||[]).includes(lbl) ? ' selected':'';
-      return `<div class="chip${on}" data-si="${i}" data-lbl="${lbl}">${lbl}</div>`;
+    const groupsHTML = page.groups.map(g => {
+      const chips = g.chips.map(lbl => {
+        const on = (selPrefs[g.id]||[]).includes(lbl) ? ' selected':'';
+        return `<div class="chip${on}" data-gid="${g.id}" data-lbl="${lbl}">${lbl}</div>`;
+      }).join('');
+      return `<div class="pref-group">
+        <div class="pref-group-lbl">${g.label}</div>
+        <div class="chip-group">${chips}</div>
+      </div>`;
     }).join('');
-    return `<div class="pref-step" id="ps${i}"><div class="chip-group">${chips}</div></div>`;
+    return `<div class="pref-page" id="pp${i}">${groupsHTML}</div>`;
   }).join('');
 
   vp.addEventListener('click', e => {
     const chip = e.target.closest('.chip'); if (!chip) return;
     chip.classList.toggle('selected');
-    const si=parseInt(chip.dataset.si), lbl=chip.dataset.lbl, id=STEPS[si].id;
-    if (!selPrefs[id]) selPrefs[id]=[];
-    if (chip.classList.contains('selected')) { if(!selPrefs[id].includes(lbl)) selPrefs[id].push(lbl); }
-    else selPrefs[id]=selPrefs[id].filter(l=>l!==lbl);
+    const gid = chip.dataset.gid, lbl = chip.dataset.lbl;
+    if (!selPrefs[gid]) selPrefs[gid] = [];
+    if (chip.classList.contains('selected')) { if(!selPrefs[gid].includes(lbl)) selPrefs[gid].push(lbl); }
+    else selPrefs[gid] = selPrefs[gid].filter(l => l !== lbl);
   });
+
   prefReady = true;
-  showStep(0, false);
+  showPrefPage(0, false);
 }
 
-function showStep(index, animate=true) {
+function showPrefPage(index, animate=true) {
   const dir = index >= curPref ? 'slide-r' : 'slide-l';
-  document.querySelectorAll('.pref-step').forEach(s => s.classList.remove('active','slide-r','slide-l'));
-  const target = document.getElementById('ps'+index);
+  document.querySelectorAll('.pref-page').forEach(p => p.classList.remove('active','slide-r','slide-l'));
+  const target = document.getElementById('pp'+index);
   if (animate) {
     target.classList.add('active', dir);
     target.addEventListener('animationend', () => target.classList.remove(dir), {once:true});
   } else { target.classList.add('active'); }
+
   curPref = index;
-  const s = STEPS[index], total = STEPS.length;
+  const page = PREF_PAGES[index], total = PREF_PAGES.length;
   document.getElementById('prefFill').style.width = `${(index/total)*100}%`;
+
   const li = document.getElementById('prefLI');
+  const update = () => {
+    document.getElementById('prefNum').textContent = `${index+1} of ${total}`;
+    document.getElementById('prefTitle').textContent = page.title;
+    document.getElementById('prefDesc').textContent = page.desc;
+    document.getElementById('prefNote').textContent = page.isText ? 'Optional' : 'Optional — select all that apply';
+  };
   if (animate) {
     li.classList.add('fading');
-    setTimeout(() => {
-      document.getElementById('prefNum').textContent = `${index+1} of ${total}`;
-      document.getElementById('prefTitle').textContent = s.title;
-      document.getElementById('prefDesc').textContent = s.desc;
-      li.classList.remove('fading');
-    }, 220);
-  } else {
-    document.getElementById('prefNum').textContent = `${index+1} of ${total}`;
-    document.getElementById('prefTitle').textContent = s.title;
-    document.getElementById('prefDesc').textContent = s.desc;
-  }
+    setTimeout(() => { update(); li.classList.remove('fading'); }, 220);
+  } else { update(); }
+
   document.getElementById('prefBack').textContent = index===0 ? '\u2190 Edit Trip' : '\u2190 Back';
   document.getElementById('prefNext').textContent = index===total-1 ? 'Review Trip \u2713' : 'Next \u2192';
-  if (s.isText) setTimeout(()=>{ const inp=document.getElementById('prefTxt'); if(inp)inp.focus(); }, 400);
+
+  if (page.isText) {
+    setTimeout(() => { const inp=document.getElementById('prefTxt'); if(inp) inp.focus(); }, 400);
+  }
+  // Scroll viewport to top on page change
+  document.getElementById('prefViewport').scrollTop = 0;
 }
 
 function saveCurText() {
-  if (STEPS[curPref].isText) { const inp=document.getElementById('prefTxt'); if(inp) selPrefs[STEPS[curPref].id]=inp.value; }
+  const page = PREF_PAGES[curPref];
+  if (page.isText) { const inp=document.getElementById('prefTxt'); if(inp) selPrefs[page.textId]=inp.value; }
 }
-function nextPref() { saveCurText(); curPref<STEPS.length-1 ? showStep(curPref+1) : finishPrefs(); }
-function prevPref() { saveCurText(); curPref>0 ? showStep(curPref-1) : showPage('form-section'); }
+function nextPref() { saveCurText(); curPref<PREF_PAGES.length-1 ? showPrefPage(curPref+1) : finishPrefs(); }
+function prevPref() { saveCurText(); curPref>0 ? showPrefPage(curPref-1) : showPage('form-section'); }
 function skipPref() {
-  delete selPrefs[STEPS[curPref].id];
-  const step=document.getElementById('ps'+curPref);
-  if(step) step.querySelectorAll('.chip.selected').forEach(c=>c.classList.remove('selected'));
-  curPref<STEPS.length-1 ? showStep(curPref+1) : finishPrefs();
+  const page = PREF_PAGES[curPref];
+  if (page.isText) {
+    selPrefs[page.textId] = '';
+    const inp = document.getElementById('prefTxt'); if(inp) inp.value='';
+  } else {
+    page.groups.forEach(g => { delete selPrefs[g.id]; });
+    document.querySelectorAll(`#pp${curPref} .chip.selected`).forEach(c => c.classList.remove('selected'));
+  }
+  curPref<PREF_PAGES.length-1 ? showPrefPage(curPref+1) : finishPrefs();
 }
-function finishPrefs() { saveCurText(); buildSummary(); showPage('summary-section'); }
+function finishPrefs() {
+  saveCurText();
+  document.getElementById('prefFill').style.width = '100%';
+  buildSummary();
+  showPage('summary-section');
+}
 
 function buildSummary() {
   const get = id => { const el=document.getElementById(id); return el?el.value||null:null; };
   let html='';
   const row=(k,v)=>{ if(v) html+=`<div class="sum-row"><span class="sum-k">${k}</span><span class="sum-v">${v}</span></div>`; };
-  row('Origin',get('origin')); row('Destination',get('destination'));
-  row('Start Date',selS?fmtD(selS):null); row('End Date',selE?fmtD(selE):null);
-  row('Travelers',get('travelers'));
-  row('Budget (CAD)',get('budget')?'$'+get('budget'):null);
-  const map={travelStyle:'Travel Style',accommodation:'Accommodation',transportTo:'Getting There',
-    transportLoc:'Getting Around',food:'Food & Dining',tripFocus:'Trip Focus',
-    climate:'Climate',visa:'Passport',mustSee:'Must-see'};
-  Object.entries(map).forEach(([id,lbl])=>{
-    const v=selPrefs[id]; if(v&&(Array.isArray(v)?v.length:v)) row(lbl,Array.isArray(v)?v.join(', '):v);
+  row('Origin', get('origin')); row('Destination', get('destination'));
+  row('Start Date', selS?fmtD(selS):null); row('End Date', selE?fmtD(selE):null);
+  row('Travelers', get('travelers'));
+  const cur = get('currency')||'CAD';
+  row('Budget', get('budget') ? `${get('budget')} ${cur}` : null);
+  const prefMap = {
+    travelStyle:'Travel Style', accommodation:'Accommodation', transportTo:'Getting There',
+    transportLoc:'Getting Around', food:'Food & Dining', tripFocus:'Trip Focus', mustSee:'Must-see',
+  };
+  Object.entries(prefMap).forEach(([id,lbl])=>{
+    const v=selPrefs[id]; if(v&&(Array.isArray(v)?v.length:v)) row(lbl, Array.isArray(v)?v.join(', '):v);
   });
-  document.getElementById('sumContent').innerHTML=html;
+  document.getElementById('sumContent').innerHTML = html;
 }
 
-// VALIDATION
+// ── VALIDATION ───────────────────────────────────
 function clamp(inp,min){if(inp.value!==''&&Number(inp.value)<min)inp.value=min;}
 function showE(id,msg){const e=document.getElementById('err-'+id);if(msg)e.textContent=msg;e.classList.add('show');}
 function hideE(id){document.getElementById('err-'+id).classList.remove('show');}
@@ -569,18 +675,18 @@ function validate(){
   const tr=document.getElementById('travelers').value;
   if(!tr||Number(tr)<1){showE('travelers','Must be at least 1 traveler');ok=false;}else hideE('travelers');
   const bu=document.getElementById('budget').value;
-  if(bu===''||Number(bu)<0){showE('budget','Budget cannot be negative');ok=false;}else hideE('budget');
+  if(bu===''||Number(bu)<0){showE('budget','Must be 0 or more');ok=false;}else hideE('budget');
   return ok;
 }
 
 function goToPrefs(){
   if(!validate()) return;
   showPage('pref-section');
-  if(!prefReady) buildPrefs(); else showStep(0,false);
+  if(!prefReady) buildPrefs(); else showPrefPage(0,false);
 }
 function goEditPrefs(){
   showPage('pref-section');
-  if(prefReady) showStep(STEPS.length-1,false);
+  if(prefReady) showPrefPage(PREF_PAGES.length-1,false);
 }
 function confirmTrip(){ showPage('confirmed-section'); }
 </script>
