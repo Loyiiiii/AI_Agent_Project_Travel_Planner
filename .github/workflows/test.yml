@@ -1,0 +1,14 @@
+name: Test TripIntakeForm
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Compile and run tests
+        run: |
+          cd code/planner_layer
+          g++ -std=c++17 TripIntakeForm.cpp test_TripIntakeForm.cpp -o test_form
+          ./test_form
