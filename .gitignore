@@ -1,0 +1,28 @@
+# Build outputs
+build/
+*/build/
+**/build/
+
+# VS Code
+.vscode/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Executables
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+
+# OS files
+.DS_Store
+Thumbs.db

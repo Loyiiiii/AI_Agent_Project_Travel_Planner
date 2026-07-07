@@ -1,36 +1,34 @@
 #include <iostream>
 
-#include <crow.h>
+#include "httplib.h"
 #include <nlohmann/json.hpp>
 
 #include "controller/TripIntakeController.h"
 
+void setCorsHeaders(httplib::Response& response) {
+    response.set_header("Access-Control-Allow-Origin", "*");
+    response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+    response.set_header("Access-Control-Allow-Headers", "Content-Type");
+}
+
 int main() {
-    crow::SimpleApp app;
+    httplib::Server server;
 
     TripIntakeController tripIntakeController;
 
-    CROW_ROUTE(app, "/api/health")
-    .methods(crow::HTTPMethod::GET)
-    ([]() {
-        crow::response response;
+    server.Get("/api/health", [](const httplib::Request& request, httplib::Response& response) {
+        nlohmann::json result = {
+            {"status", "ok"},
+            {"message", "Travel planner backend is running."}
+        };
 
-        response.code = 200;
-        response.set_header("Content-Type", "application/json");
-        response.write(R"({"status":"ok","message":"Travel planner backend is running."})");
-
-        return response;
+        setCorsHeaders(response);
+        response.status = 200;
+        response.set_content(result.dump(), "application/json");
     });
 
-    CROW_ROUTE(app, "/api/trip-intake")
-    .methods(crow::HTTPMethod::POST)
-    ([&tripIntakeController](const crow::request& request) {
-        crow::response response;
-
-        response.set_header("Content-Type", "application/json");
-        response.set_header("Access-Control-Allow-Origin", "*");
-        response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        response.set_header("Access-Control-Allow-Headers", "Content-Type");
+    server.Post("/api/trip-intake", [&tripIntakeController](const httplib::Request& request, httplib::Response& response) {
+        setCorsHeaders(response);
 
         try {
             nlohmann::json requestBody = nlohmann::json::parse(request.body);
@@ -38,13 +36,12 @@ int main() {
             nlohmann::json result = tripIntakeController.createTripRequest(requestBody);
 
             if (result.contains("valid") && result["valid"] == false) {
-                response.code = 400;
+                response.status = 400;
             } else {
-                response.code = 200;
+                response.status = 200;
             }
 
-            response.write(result.dump());
-            return response;
+            response.set_content(result.dump(), "application/json");
         } catch (const std::exception& error) {
             nlohmann::json errorResponse = {
                 {"valid", false},
@@ -53,21 +50,13 @@ int main() {
                 {"message", error.what()}
             };
 
-            response.code = 400;
-            response.write(errorResponse.dump());
-            return response;
+            response.status = 400;
+            response.set_content(errorResponse.dump(), "application/json");
         }
     });
 
-    CROW_ROUTE(app, "/api/trip-intake/confirm")
-    .methods(crow::HTTPMethod::POST)
-    ([&tripIntakeController](const crow::request& request) {
-        crow::response response;
-
-        response.set_header("Content-Type", "application/json");
-        response.set_header("Access-Control-Allow-Origin", "*");
-        response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        response.set_header("Access-Control-Allow-Headers", "Content-Type");
+    server.Post("/api/trip-intake/confirm", [&tripIntakeController](const httplib::Request& request, httplib::Response& response) {
+        setCorsHeaders(response);
 
         try {
             nlohmann::json requestBody = nlohmann::json::parse(request.body);
@@ -75,13 +64,12 @@ int main() {
             nlohmann::json result = tripIntakeController.confirmTripRequest(requestBody);
 
             if (result.contains("success") && result["success"] == false) {
-                response.code = 400;
+                response.status = 400;
             } else {
-                response.code = 200;
+                response.status = 200;
             }
 
-            response.write(result.dump());
-            return response;
+            response.set_content(result.dump(), "application/json");
         } catch (const std::exception& error) {
             nlohmann::json errorResponse = {
                 {"success", false},
@@ -90,41 +78,24 @@ int main() {
                 {"message", error.what()}
             };
 
-            response.code = 400;
-            response.write(errorResponse.dump());
-            return response;
+            response.status = 400;
+            response.set_content(errorResponse.dump(), "application/json");
         }
     });
 
-    CROW_ROUTE(app, "/api/trip-intake")
-    .methods(crow::HTTPMethod::OPTIONS)
-    ([]() {
-        crow::response response;
-
-        response.code = 204;
-        response.set_header("Access-Control-Allow-Origin", "*");
-        response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        response.set_header("Access-Control-Allow-Headers", "Content-Type");
-
-        return response;
+    server.Options("/api/trip-intake", [](const httplib::Request& request, httplib::Response& response) {
+        setCorsHeaders(response);
+        response.status = 204;
     });
 
-    CROW_ROUTE(app, "/api/trip-intake/confirm")
-    .methods(crow::HTTPMethod::OPTIONS)
-    ([]() {
-        crow::response response;
-
-        response.code = 204;
-        response.set_header("Access-Control-Allow-Origin", "*");
-        response.set_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        response.set_header("Access-Control-Allow-Headers", "Content-Type");
-
-        return response;
+    server.Options("/api/trip-intake/confirm", [](const httplib::Request& request, httplib::Response& response) {
+        setCorsHeaders(response);
+        response.status = 204;
     });
 
     std::cout << "Travel planner backend running on http://localhost:8080" << std::endl;
 
-    app.port(8080).multithreaded().run();
+    server.listen("localhost", 8080);
 
     return 0;
 }
