@@ -1,0 +1,134 @@
+@startuml
+title Trip Intake Agent - Class Diagram
+
+skinparam classAttributeIconSize 0
+
+package "Frontend" {
+  class TripIntakePage <<frontend>> {
+    - currentStep
+    - tripRequest
+    - errors
+    - isLoading
+
+    + handleSubmit(formData): void
+    + handleConfirm(): void
+    + handleEdit(): void
+    + handleStartOver(): void
+  }
+
+  class TripIntakeForm <<frontend>> {
+    - formData
+
+    + handleChange(event): void
+    + handleSubmit(event): void
+  }
+
+  class TripSummary <<frontend>> {
+    + formatInterests(interests): string
+  }
+
+  class tripIntakeApi <<frontend api>> {
+    + checkBackendHealth(): Promise
+    + submitTripIntake(tripData): Promise
+    + confirmTripRequest(tripRequest): Promise
+  }
+}
+
+package "Backend" {
+  class TripRequest {
+    - requestId: string
+    - origin: string
+    - destination: string
+    - startDate: string
+    - endDate: string
+    - numberOfTravelers: int
+    - budget: double
+    - currency: string
+    - interests: vector<string>
+    - travelPace: string
+    - status: TripRequestStatus
+
+    + TripRequest()
+    + getRequestId(): string
+    + setRequestId(requestId: string): void
+    + getOrigin(): string
+    + setOrigin(origin: string): void
+    + getDestination(): string
+    + setDestination(destination: string): void
+    + getStartDate(): string
+    + setStartDate(startDate: string): void
+    + getEndDate(): string
+    + setEndDate(endDate: string): void
+    + getNumberOfTravelers(): int
+    + setNumberOfTravelers(numberOfTravelers: int): void
+    + getBudget(): double
+    + setBudget(budget: double): void
+    + getCurrency(): string
+    + setCurrency(currency: string): void
+    + getInterests(): vector<string>
+    + setInterests(interests: vector<string>): void
+    + getTravelPace(): string
+    + setTravelPace(travelPace: string): void
+    + getStatus(): TripRequestStatus
+    + setStatus(status: TripRequestStatus): void
+  }
+
+  enum TripRequestStatus {
+    DRAFT
+    PENDING_CONFIRMATION
+    CONFIRMED
+    SAVED
+  }
+
+  class FieldValidator {
+    + validate(tripRequest: TripRequest): vector<string>
+    - isEmpty(value: string): bool
+    - isValidDateRange(startDate: string, endDate: string): bool
+  }
+
+  class TripRequestRepository {
+    - savedRequests: unordered_map<string, TripRequest>
+
+    + save(tripRequest: TripRequest): TripRequest
+    + existsById(requestId: string): bool
+    + findById(requestId: string): TripRequest
+    + findAll(): vector<TripRequest>
+  }
+
+  class TripIntakeController {
+    - fieldValidator: FieldValidator
+    - tripRequestRepository: TripRequestRepository
+    - nextRequestNumber: int
+
+    + TripIntakeController()
+    + createTripRequest(requestBody: json): json
+    + confirmTripRequest(requestBody: json): json
+    - parseTripRequestFromJson(requestBody: json): TripRequest
+    - convertTripRequestToJson(tripRequest: TripRequest): json
+    - convertErrorsToJson(errors: vector<string>): json
+    - generateRequestId(): string
+  }
+
+  class main <<http server>> {
+    + GET /api/health
+    + POST /api/trip-intake
+    + POST /api/trip-intake/confirm
+  }
+}
+
+TripIntakePage --> TripIntakeForm : renders
+TripIntakePage --> TripSummary : renders
+TripIntakePage --> tripIntakeApi : calls
+
+tripIntakeApi ..> main : HTTP requests
+
+main --> TripIntakeController : delegates requests
+
+TripIntakeController --> TripRequest : creates / converts
+TripIntakeController --> FieldValidator : validates
+TripIntakeController --> TripRequestRepository : saves
+TripRequest --> TripRequestStatus : has status
+FieldValidator --> TripRequest : reads
+TripRequestRepository --> TripRequest : stores
+
+@enduml

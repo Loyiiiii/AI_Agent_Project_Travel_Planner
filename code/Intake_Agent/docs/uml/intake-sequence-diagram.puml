@@ -1,0 +1,69 @@
+@startuml
+title Trip Intake Agent - Sequence Diagram
+
+actor User
+
+participant "TripIntakeForm\n<<frontend>>" as Form
+participant "TripIntakePage\n<<frontend>>" as Page
+participant "tripIntakeApi.js\n<<frontend api>>" as API
+participant "HTTP Server\nmain.cpp\n<<backend>>" as Server
+participant "TripIntakeController\n<<controller>>" as Controller
+participant "TripRequest\n<<model>>" as TripRequest
+participant "FieldValidator\n<<service>>" as Validator
+participant "TripSummary\n<<frontend>>" as Summary
+participant "TripRequestRepository\n<<repository>>" as Repository
+
+User -> Form: Fill trip intake form
+User -> Form: Click Submit
+
+Form -> Page: onSubmit(formData)
+Page -> API: submitTripIntake(formData)
+API -> Server: POST /api/trip-intake
+
+Server -> Controller: createTripRequest(requestBody)
+Controller -> TripRequest: parseTripRequestFromJson(requestBody)
+Controller -> TripRequest: generate requestId
+Controller -> Validator: validate(tripRequest)
+Validator --> Controller: errors
+
+alt Validation failed
+    Controller --> Server: JSON { valid: false, errors }
+    Server --> API: HTTP 400 response
+    API --> Page: response errors
+    Page --> Form: display validation errors
+else Validation passed
+    Controller -> TripRequest: setStatus(PENDING_CONFIRMATION)
+    Controller --> Server: JSON { valid: true, tripRequest }
+    Server --> API: HTTP 200 response
+    API --> Page: response tripRequest
+    Page -> Summary: render TripSummary(tripRequest)
+    Summary --> User: Display trip summary
+
+    User -> Summary: Click Confirm
+    Summary -> Page: onConfirm()
+    Page -> API: confirmTripRequest(tripRequest)
+    API -> Server: POST /api/trip-intake/confirm
+
+    Server -> Controller: confirmTripRequest(requestBody)
+    Controller -> TripRequest: parseTripRequestFromJson(requestBody)
+    Controller -> Validator: validate(tripRequest)
+    Validator --> Controller: errors
+
+    alt Confirmation validation failed
+        Controller --> Server: JSON { success: false, errors }
+        Server --> API: HTTP 400 response
+        API --> Page: response errors
+        Page --> Summary: display errors
+    else Confirmation successful
+        Controller -> TripRequest: setStatus(CONFIRMED)
+        Controller -> TripRequest: setStatus(SAVED)
+        Controller -> Repository: save(tripRequest)
+        Repository --> Controller: savedTripRequest
+        Controller --> Server: JSON { success: true, tripRequest }
+        Server --> API: HTTP 200 response
+        API --> Page: response saved tripRequest
+        Page --> User: Display success page
+    end
+end
+
+@enduml
