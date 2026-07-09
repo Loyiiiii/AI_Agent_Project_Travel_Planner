@@ -1,10 +1,22 @@
-# Build outputs
+# Node dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Frontend build output
+dist/
+*/dist/
+**/dist/
+
+# Backend build output
 build/
 */build/
 **/build/
 
-# VS Code
-.vscode/
+# Environment variables
+.env
+.env.*
+!.env.example
 
 # CMake generated files
 CMakeFiles/
@@ -16,13 +28,17 @@ Makefile
 *.vcxproj.filters
 *.vcxproj.user
 
-# Executables
+# Executables and binary files
 *.exe
 *.dll
 *.lib
 *.pdb
 *.ilk
+*.obj
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
