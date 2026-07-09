@@ -1,18 +1,54 @@
+/* ==========================================================================
+   trip intake form styles
+   ---
+   going for a "private travel dossier" feel instead of a generic web form —
+   think the inside of a nice passport holder. deep navy, warm parchment,
+   a little brass foil detailing. the step tracker at the top is styled
+   like a boarding pass stub, dashed line and all.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* core palette — keeping this to a tight set of colors on purpose */
+  --ink: #14213D;          /* main text / headings */
+  --ink-soft: #2A3654;     /* slightly lighter, used for the active step bg */
+  --parchment: #F6F2E9;    /* page background */
+  --parchment-panel: #FFFDF8; /* cards sit just a touch lighter than the page */
+  --brass: #A6803E;        /* the one accent color, used sparingly on purpose */
+  --brass-soft: #EDE1C6;   /* faded brass, for chip fills etc */
+  --slate: #6B6558;        /* secondary text, warm gray not cold gray */
+  --hairline: #DFD6C1;     /* thin borders / dividers everywhere */
+  --red-dust: #8C3B33;     /* error state, kept muted instead of alarm-red */
+  --red-dust-bg: #FBF1EE;
+  --moss: #3E5C48;         /* success state, muted green */
+  --moss-bg: #F1F7F1;
+
+  /* type */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --radius: 3px;
+  --radius-lg: 4px;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f7fb;
-  color: #222;
+  font-family: var(--font-body);
+  background: var(--parchment);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
 input,
 select {
   font: inherit;
+  color: inherit;
 }
 
 button {
@@ -23,149 +59,399 @@ button:disabled,
 input:disabled,
 select:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
+::selection {
+  background: var(--brass-soft);
+  color: var(--ink);
+}
+
+/* don't skip focus states just because they're not in the design mockup —
+   people tabbing through the form still need to see where they are */
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   page shell
+   ========================================================================== */
+
 .trip-intake-page {
-  max-width: 860px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 56px 24px 80px;
 }
 
 .page-header {
-  margin-bottom: 28px;
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.page-header .eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brass);
+  margin-bottom: 10px;
 }
 
 .page-header h1 {
-  margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 1.15;
+  margin: 0 0 10px;
+  color: var(--ink);
 }
 
 .page-header p {
-  color: #555;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--slate);
+  margin: 0;
+  max-width: 46ch; /* keeps the line length readable, not full-bleed */
 }
+
+/* ==========================================================================
+   step tracker — the "boarding pass" bit
+   this is the one place we let the design get a little playful.
+   markup should look roughly like:
+   <ol class="itinerary-track">
+     <li class="itinerary-step is-complete"><span class="step-index">01</span><span class="step-label">Destination</span></li>
+     <li class="itinerary-step is-current">...</li>
+     <li class="itinerary-step">...</li>
+   </ol>
+   ========================================================================== */
+
+.itinerary-track {
+  display: flex;
+  list-style: none;
+  margin: 0 0 40px;
+  padding: 0;
+  background: var(--ink);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.itinerary-step {
+  flex: 1;
+  position: relative;
+  padding: 16px 18px;
+  border-right: 1px dashed rgba(246, 242, 233, 0.25); /* the "perforation" */
+  color: rgba(246, 242, 233, 0.45);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.itinerary-step:last-child {
+  border-right: none;
+}
+
+.itinerary-step .step-index {
+  display: block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.itinerary-step .step-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.itinerary-step.is-complete {
+  color: var(--brass-soft);
+}
+
+.itinerary-step.is-current {
+  color: var(--parchment);
+  background: var(--ink-soft);
+}
+
+.itinerary-step.is-current .step-index {
+  color: var(--brass);
+}
+
+/* ==========================================================================
+   panels — form / summary / success / error all share the same card look
+   ========================================================================== */
 
 .trip-intake-form,
 .trip-summary,
 .success-box,
 .error-box {
-  background: #ffffff;
-  border: 1px solid #dde3ee;
-  border-radius: 12px;
-  padding: 24px;
+  background: var(--parchment-panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  padding: 36px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
+
+/* ==========================================================================
+   form fields
+   went with underline-only inputs instead of boxed fields — reads calmer
+   and fits the "dossier" vibe better than a bunch of bordered rectangles
+   ========================================================================== */
 
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 label {
+  font-family: var(--font-body);
+  font-size: 11px;
   font-weight: 600;
-  margin-bottom: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 8px;
 }
 
 input,
 select {
-  padding: 10px 12px;
-  border: 1px solid #cfd7e6;
-  border-radius: 8px;
-  background: #fff;
+  padding: 12px 4px;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px; /* 16px avoids the iOS auto-zoom-on-focus annoyance */
+  color: var(--ink);
+  transition: border-color 0.2s ease;
+}
+
+input:hover,
+select:hover {
+  border-bottom-color: var(--slate);
+}
+
+input:focus,
+select:focus {
+  border-bottom-color: var(--brass);
+}
+
+input::placeholder {
+  color: #B7AF9D;
 }
 
 small {
   margin-top: 6px;
-  color: #666;
+  font-size: 12.5px;
+  color: var(--slate);
 }
+
+/* ==========================================================================
+   chips — for the preference tags (vibe, pace, accommodation, etc)
+   markup: <button type="button" class="chip is-selected">Beach</button>
+   ========================================================================== */
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  padding: 8px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--slate);
+  transition: all 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--brass);
+  color: var(--ink);
+}
+
+.chip.is-selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--parchment);
+}
+
+.chip.is-selected:hover {
+  border-color: var(--brass); /* still give some hover feedback even when selected */
+}
+
+/* ==========================================================================
+   buttons
+   ========================================================================== */
 
 button {
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  background: #1f5eff;
-  color: white;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 13px 28px;
+  background: var(--ink);
+  color: var(--parchment);
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+button:hover:not(:disabled) {
+  background: var(--brass);
+  border-color: var(--brass);
+}
+
+/* secondary / "back" style buttons — just outline, no fill */
 button[type="button"] {
-  background: #3f4655;
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--hairline);
+}
+
+button[type="button"]:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: transparent;
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   summary — reads like a page out of a dossier, not a spreadsheet
+   ========================================================================== */
+
+.trip-summary h2,
+.success-box h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 26px;
+  margin-top: 0;
 }
 
 .summary-card {
-  border: 1px solid #dde3ee;
-  border-radius: 10px;
-  overflow: hidden;
+  border-top: 1px solid var(--hairline);
   margin: 18px 0;
 }
 
 .summary-row {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  border-bottom: 1px solid #edf1f7;
-}
-
-.summary-row:last-child {
-  border-bottom: none;
+  grid-template-columns: 200px 1fr;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .summary-label {
-  background: #f7f9fc;
+  background: transparent;
+  font-size: 11px;
   font-weight: 600;
-  padding: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 0;
 }
 
 .summary-value {
-  padding: 12px;
+  padding: 0;
+  font-family: var(--font-display); /* serif here makes the actual trip details feel a bit more "written" */
+  font-size: 18px;
+  color: var(--ink);
 }
 
 .summary-actions {
   display: flex;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 24px;
 }
 
+/* ==========================================================================
+   status panels — errors and success
+   ========================================================================== */
+
 .error-box {
-  border-color: #ffb4b4;
-  background: #fff7f7;
+  border-color: #E3BEB6;
+  background: var(--red-dust-bg);
 }
 
 .error-box h3 {
   margin-top: 0;
-  color: #a40000;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--red-dust);
 }
 
 .error-box li {
   margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--ink);
 }
 
 .success-box {
-  border-color: #b7e4c7;
-  background: #f6fff8;
+  border-color: #BFD7C4;
+  background: var(--moss-bg);
 }
 
 .success-box h2 {
-  color: #166534;
+  color: var(--moss);
 }
 
+/* ==========================================================================
+   responsive — collapses to a single column below 640px
+   ========================================================================== */
+
 @media (max-width: 640px) {
+  .trip-intake-page {
+    padding: 32px 16px 56px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+  }
+
+  .trip-intake-form,
+  .trip-summary,
+  .success-box,
+  .error-box {
+    padding: 24px;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
 
-  .summary-row {
-    grid-template-columns: 1fr;
+  .itinerary-track {
+    flex-wrap: wrap;
   }
 
-  .summary-label {
-    border-bottom: 1px solid #edf1f7;
+  .itinerary-step {
+    flex: 1 1 50%;
+    border-bottom: 1px dashed rgba(246, 242, 233, 0.25);
+  }
+
+  .summary-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 
   .summary-actions {
