@@ -80,7 +80,7 @@ function TripIntakePage() {
   return (
     <main className="trip-intake-page">
       <section className="page-header">
-        <h1>Trip Intake Agent</h1>
+        <h1>Travel Planner Agent</h1>
         <p>
           Enter your basic travel information. We will validate it and prepare a
           structured trip request for planning.

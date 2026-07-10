@@ -31,18 +31,37 @@ const CITIES = [
 
 const CURRENCIES = ["CAD", "USD", "CNY", "EUR", "JPY", "KRW"];
 
-const INTEREST_CHIPS = [
-  "Food", "Photography", "Nature", "Culture & Museums", "Adventure & Sports",
-  "Nightlife", "Shopping", "History", "Relaxation", "Hiking", "Beach", "Family-friendly",
+// travel style chip -> backend travelPace enum
+const PACE_MAP = { "Relaxed": "relaxed", "Moderate": "balanced", "Packed": "packed", "Spontaneous": "balanced" };
+
+const PREF_PAGES = [
+  {
+    title: "Travel & Stay",
+    desc: "How you like to get there and where you sleep.",
+    groups: [
+      { id: "travelStyle", label: "Travel Style", chips: ["Relaxed", "Moderate", "Packed", "Spontaneous"] },
+      { id: "accommodation", label: "Accommodation", chips: ["Luxury Hotel (5★)", "Hotel (3–4★)", "Boutique Hotel", "Airbnb", "Hostel", "Camping / Glamping"] },
+      { id: "transportTo", label: "Getting There", chips: ["Economy Flight", "Business Flight", "Train", "Bus / Coach", "Drive", "Carpool"] },
+    ],
+  },
+  {
+    title: "Activities & Food",
+    desc: "What you want to do and how you like to eat.",
+    groups: [
+      { id: "transportLoc", label: "Getting Around", chips: ["Public Transit", "Rental Car", "Rideshare", "Bike / E-Bike", "Walk everywhere", "Taxi"] },
+      { id: "food", label: "Food & Dining", chips: ["Local & Street Food", "Fine Dining", "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-Free"] },
+      { id: "tripFocus", label: "Trip Focus", chips: ["Culture & Museums", "Nature & Outdoors", "Adventure & Sports", "Beach & Relaxation", "Nightlife", "Food Tour", "Shopping", "Family-friendly", "Romance"] },
+    ],
+  },
+  {
+    title: "Anything else?",
+    desc: "Must-sees, special needs, or notes for our agents.",
+    isText: true,
+    placeholder: "e.g. F1 Grand Prix on Saturday, wheelchair accessible",
+  },
 ];
 
-const PACE_CHIPS = [
-  { value: "relaxed", label: "Relaxed" },
-  { value: "balanced", label: "Balanced" },
-  { value: "packed", label: "Packed" },
-];
-
-// ── helpers ──────────────────────────────────────────────────
+// ── date helpers ─────────────────────────────────────────────
 const toISO = (d) => {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -61,6 +80,16 @@ const fmtDisplay = (iso) => {
 };
 const sameDay = (a, b) =>
   a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+function CalendarIcon() {
+  return (
+    <svg className="cal-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="1.5" y="2.5" width="13" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M1.5 6h13" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4.5 1v3M11.5 1v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 // ── city autocomplete field ─────────────────────────────────
 function CityField({ id, label, value, onChange, placeholder }) {
@@ -105,7 +134,7 @@ function CityField({ id, label, value, onChange, placeholder }) {
   );
 }
 
-// ── date range calendar popover ─────────────────────────────
+// ── date range calendar popover (with calendar icon trigger) ─
 function DateRangeField({ startDate, endDate, onChange }) {
   const [open, setOpen] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
@@ -177,12 +206,12 @@ function DateRangeField({ startDate, endDate, onChange }) {
         onClick={() => setOpen((o) => !o)}
       >
         <div className="ds">
-          <span className="ds-lbl">Start Date</span>
+          <span className="ds-lbl"><CalendarIcon /> Start Date</span>
           <span className={`ds-val${startDate ? "" : " ph"}`}>{fmtDisplay(startDate) || "Add date"}</span>
         </div>
         <div className="ds-div" />
         <div className="ds">
-          <span className="ds-lbl">End Date</span>
+          <span className="ds-lbl"><CalendarIcon /> End Date</span>
           <span className={`ds-val${endDate ? "" : " ph"}`}>{fmtDisplay(endDate) || "Add date"}</span>
         </div>
       </div>
@@ -213,6 +242,7 @@ function DateRangeField({ startDate, endDate, onChange }) {
 // ── main component ──────────────────────────────────────────
 function TripIntakeForm({ initialData, onSubmit, isLoading }) {
   const [step, setStep] = useState("basics"); // 'basics' | 'preferences'
+  const [prefPage, setPrefPage] = useState(0);
 
   const [origin, setOrigin] = useState(initialData?.origin || "");
   const [destination, setDestination] = useState(initialData?.destination || "");
@@ -222,14 +252,15 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
   const [budget, setBudget] = useState(initialData?.budget || "");
   const [currency, setCurrency] = useState(initialData?.currency || "CAD");
 
-  const [selectedInterests, setSelectedInterests] = useState(initialData?.interests || []);
-  const [customInterests, setCustomInterests] = useState("");
-  const [travelPace, setTravelPace] = useState(initialData?.travelPace || "balanced");
+  const [selPrefs, setSelPrefs] = useState({}); // { groupId: [labels] }
+  const [notes, setNotes] = useState("");
 
-  function toggleInterest(label) {
-    setSelectedInterests((prev) =>
-      prev.includes(label) ? prev.filter((i) => i !== label) : [...prev, label]
-    );
+  function toggleChip(groupId, label) {
+    setSelPrefs((prev) => {
+      const cur = prev[groupId] || [];
+      const next = cur.includes(label) ? cur.filter((l) => l !== label) : [...cur, label];
+      return { ...prev, [groupId]: next };
+    });
   }
 
   function handleDateChange(newStart, newEnd) {
@@ -240,15 +271,37 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
   function goToPreferences(e) {
     e.preventDefault();
     setStep("preferences");
+    setPrefPage(0);
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  function nextPrefPage() {
+    if (prefPage < PREF_PAGES.length - 1) setPrefPage((p) => p + 1);
+    else finishAndSubmit();
+  }
+  function prevPrefPage() {
+    if (prefPage > 0) setPrefPage((p) => p - 1);
+    else setStep("basics");
+  }
+  function skipPrefPage() {
+    const page = PREF_PAGES[prefPage];
+    if (page.isText) setNotes("");
+    else {
+      setSelPrefs((prev) => {
+        const next = { ...prev };
+        page.groups.forEach((g) => delete next[g.id]);
+        return next;
+      });
+    }
+    if (prefPage < PREF_PAGES.length - 1) setPrefPage((p) => p + 1);
+    else finishAndSubmit();
+  }
 
-    const customList = customInterests
-      .split(",")
-      .map((i) => i.trim())
-      .filter((i) => i.length > 0);
+  function finishAndSubmit() {
+    const travelStyleSel = (selPrefs.travelStyle || [])[0];
+    const travelPace = PACE_MAP[travelStyleSel] || "balanced";
+
+    const allChipInterests = Object.values(selPrefs).flat();
+    const noteInterests = notes.split(",").map((s) => s.trim()).filter(Boolean);
 
     const cleanedFormData = {
       origin: origin.trim(),
@@ -258,26 +311,38 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
       numberOfTravelers: Number(numberOfTravelers),
       budget: Number(budget),
       currency: currency.trim(),
-      interests: [...selectedInterests, ...customList],
+      interests: [...allChipInterests, ...noteInterests],
       travelPace,
     };
 
     onSubmit(cleanedFormData);
   }
 
+  const currentPage = PREF_PAGES[prefPage];
+  const progressPct = (prefPage / PREF_PAGES.length) * 100;
+
   return (
     <div className="trip-intake-form">
       <div className="wizard-split">
+        {step === "preferences" && (
+          <div className="pref-progress-track"><div className="pref-progress-fill" style={{ width: `${progressPct}%` }} /></div>
+        )}
+
         <div className="wizard-left">
-          <p className="step-eyebrow">{step === "basics" ? "Step 01 — Basics" : "Step 02 — Preferences"}</p>
-          <h2 className="wizard-title">
-            {step === "basics" ? <>Tell us about<br />your trip</> : <>What's your<br />style?</>}
-          </h2>
-          <p className="wizard-desc">
-            {step === "basics"
-              ? "Fill in the required fields. We'll ask about your preferences next."
-              : "Optional — select all that apply."}
-          </p>
+          {step === "basics" ? (
+            <>
+              <p className="step-eyebrow">Step 01 — Basics</p>
+              <h2 className="wizard-title">Tell us about<br />your trip</h2>
+              <p className="wizard-desc">Fill in the required fields. We'll ask about your preferences next.</p>
+            </>
+          ) : (
+            <>
+              <p className="step-eyebrow">{prefPage + 1} of {PREF_PAGES.length}</p>
+              <h2 className="wizard-title">{currentPage.title}</h2>
+              <p className="wizard-desc">{currentPage.desc}</p>
+              <p className="pref-note">{currentPage.isText ? "Optional" : "Optional — select all that apply"}</p>
+            </>
+          )}
         </div>
 
         <div className="wizard-right">
@@ -340,56 +405,45 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
           )}
 
           {step === "preferences" && (
-            <form onSubmit={handleSubmit}>
-              <div className="pref-group">
-                <div className="pref-group-lbl">Interests</div>
-                <div className="chip-group">
-                  {INTEREST_CHIPS.map((label) => (
-                    <div
-                      key={label}
-                      className={`chip${selectedInterests.includes(label) ? " selected" : ""}`}
-                      onClick={() => toggleInterest(label)}
-                    >
-                      {label}
+            <div className="pref-viewport">
+              {currentPage.isText ? (
+                <input
+                  type="text"
+                  className="pref-text-in"
+                  placeholder={currentPage.placeholder}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  disabled={isLoading}
+                />
+              ) : (
+                currentPage.groups.map((g) => (
+                  <div className="pref-group" key={g.id}>
+                    <div className="pref-group-lbl">{g.label}</div>
+                    <div className="chip-group">
+                      {g.chips.map((label) => (
+                        <div
+                          key={label}
+                          className={`chip${(selPrefs[g.id] || []).includes(label) ? " selected" : ""}`}
+                          onClick={() => toggleChip(g.id, label)}
+                        >
+                          {label}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: 14 }}>
-                  <input
-                    type="text"
-                    className="pref-text-in"
-                    placeholder="Add your own, separated by commas"
-                    value={customInterests}
-                    onChange={(e) => setCustomInterests(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="pref-group">
-                <div className="pref-group-lbl">Travel Pace</div>
-                <div className="chip-group">
-                  {PACE_CHIPS.map(({ value, label }) => (
-                    <div
-                      key={value}
-                      className={`chip${travelPace === value ? " selected" : ""}`}
-                      onClick={() => setTravelPace(value)}
-                    >
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                ))
+              )}
 
               <div className="pref-nav">
-                <button type="button" className="btn-pb" onClick={() => setStep("basics")} disabled={isLoading}>
-                  ← Back
+                <button type="button" className="btn-pb" onClick={prevPrefPage} disabled={isLoading}>
+                  {prefPage === 0 ? "← Edit Trip" : "← Back"}
                 </button>
-                <button type="submit" className="btn-pn" disabled={isLoading}>
-                  {isLoading ? "Submitting..." : "Review Trip ✓"}
+                <button type="button" className="btn-ps" onClick={skipPrefPage} disabled={isLoading}>Skip</button>
+                <button type="button" className="btn-pn" onClick={nextPrefPage} disabled={isLoading}>
+                  {isLoading ? "Submitting..." : prefPage === PREF_PAGES.length - 1 ? "Review Trip ✓" : "Next →"}
                 </button>
               </div>
-            </form>
+            </div>
           )}
         </div>
       </div>
