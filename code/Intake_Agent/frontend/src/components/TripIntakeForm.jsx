@@ -48,7 +48,7 @@ const PREF_PAGES = [
     title: "Activities & Food",
     desc: "What you want to do and how you like to eat.",
     groups: [
-      { id: "transportLoc", label: "Getting Around", accent: "gold", chips: ["Public Transit", "Rental Car", "Rideshare", "Bike / E-Bike", "Walk everywhere", "Taxi"] },
+      { id: "transportLoc", label: "Getting Around", accent: "gold", chips: ["Public Transit", "Rental Car", "Self-Drive", "Rideshare", "Bike / E-Bike", "Walk everywhere", "Taxi"] },
       { id: "food", label: "Food & Dining", accent: "blue", chips: ["Local & Street Food", "Fine Dining", "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-Free"] },
       { id: "tripFocus", label: "Trip Focus", accent: "gold", chips: ["Culture & Museums", "Nature & Outdoors", "Adventure & Sports", "Beach & Relaxation", "Nightlife", "Food Tour", "Shopping", "Family-friendly", "Romance"] },
     ],
