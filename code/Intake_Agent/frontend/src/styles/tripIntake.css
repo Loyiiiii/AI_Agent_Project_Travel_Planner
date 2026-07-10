@@ -11,8 +11,10 @@
 * { box-sizing: border-box; }
 
 :root {
-  --sand:#F7F3EE; --stone:#E8E0D5; --ink:#1C1917;
-  --mist:#6B6560; --accent:#2D5F8A; --error:#B85450;
+  /* cool palette — Klein blue as the primary accent, pale cool gold as the secondary accent */
+  --sand:#F3F5F9; --stone:#DCE1EB; --ink:#0C1524;
+  --mist:#5B6478; --accent:#1B2FBF; --gold:#C6A972; --error:#B85450;
+  --ink-soft:#16213D;
 }
 
 body {
@@ -177,6 +179,17 @@ small { display: block; margin-top: 6px; font-size: 12px; color: var(--mist); }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
 
+/* alternating cool accent — blue groups vs gold groups, kept desaturated so it stays harmonious */
+.pref-group.accent-gold .chip:hover { border-color: var(--gold); color: #8A7238; }
+.pref-group.accent-gold .chip.selected { border-color: var(--gold); background: var(--gold); color: var(--ink); }
+.pref-group.accent-blue .chip:hover { border-color: var(--accent); color: var(--accent); }
+.pref-group.accent-blue .chip.selected { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+/* field-level validation messages */
+.ferr { display: none; font-size: 11px; color: var(--error); margin-top: 6px; }
+.ferr.show { display: block; }
+input.invalid { border-bottom-color: var(--error); }
+
 .pref-text-in {
   width: 100%; padding: 12px 0; border: none; border-bottom: 1.5px solid var(--stone);
   font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); background: transparent;
@@ -236,6 +249,65 @@ small { display: block; margin-top: 6px; font-size: 12px; color: var(--mist); }
 .summary-actions button { padding: 13px 24px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 2px; cursor: pointer; }
 .summary-actions button[type="button"]:first-child { background: transparent; border: 1.5px solid var(--stone); color: var(--mist); }
 .summary-actions button:last-child { background: var(--accent); border: none; color: #fff; }
+
+/* ==========================================================================
+   hero / splash screen — sits before the page-header + form, full viewport,
+   background image with a cool dark overlay so the Klein blue / gold
+   palette still reads through
+   ========================================================================== */
+
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--ink);
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/hero-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  /* cool blue-tinted overlay via filter, kept dark enough for white text */
+  filter: brightness(.5) saturate(1.05);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12,21,36,.55) 0%, rgba(12,21,36,.35) 45%, rgba(12,21,36,.75) 100%);
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 720px;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif; font-size: clamp(44px, 7vw, 80px);
+  font-weight: 300; color: #fff; line-height: 1.08; margin-bottom: 28px;
+}
+.hero-title em { font-style: italic; color: var(--gold); }
+.hero-sub {
+  font-size: 15px; font-weight: 300; color: rgba(255,255,255,.7); line-height: 1.7;
+  margin-bottom: 44px; max-width: 440px; margin-left: auto; margin-right: auto;
+}
+.btn-hero {
+  display: inline-flex; align-items: center; gap: 10px; padding: 16px 36px;
+  background: #fff; color: var(--ink); font-size: 13px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; border: none; border-radius: 2px;
+  cursor: pointer; transition: background .2s, color .2s; font-family: inherit;
+}
+.btn-hero:hover { background: var(--accent); color: #fff; }
 
 /* ==========================================================================
    responsive

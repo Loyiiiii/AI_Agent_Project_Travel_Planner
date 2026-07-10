@@ -39,18 +39,18 @@ const PREF_PAGES = [
     title: "Travel & Stay",
     desc: "How you like to get there and where you sleep.",
     groups: [
-      { id: "travelStyle", label: "Travel Style", chips: ["Relaxed", "Moderate", "Packed", "Spontaneous"] },
-      { id: "accommodation", label: "Accommodation", chips: ["Luxury Hotel (5★)", "Hotel (3–4★)", "Boutique Hotel", "Airbnb", "Hostel", "Camping / Glamping"] },
-      { id: "transportTo", label: "Getting There", chips: ["Economy Flight", "Business Flight", "Train", "Bus / Coach", "Drive", "Carpool"] },
+      { id: "travelStyle", label: "Travel Style", accent: "blue", chips: ["Relaxed", "Moderate", "Packed", "Spontaneous"] },
+      { id: "accommodation", label: "Accommodation", accent: "gold", chips: ["Luxury Hotel (5★)", "Hotel (3–4★)", "Boutique Hotel", "Airbnb", "Hostel", "Camping / Glamping"] },
+      { id: "transportTo", label: "Getting There", accent: "blue", chips: ["Economy Flight", "Business Flight", "Train", "Bus / Coach", "Drive", "Carpool"] },
     ],
   },
   {
     title: "Activities & Food",
     desc: "What you want to do and how you like to eat.",
     groups: [
-      { id: "transportLoc", label: "Getting Around", chips: ["Public Transit", "Rental Car", "Rideshare", "Bike / E-Bike", "Walk everywhere", "Taxi"] },
-      { id: "food", label: "Food & Dining", chips: ["Local & Street Food", "Fine Dining", "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-Free"] },
-      { id: "tripFocus", label: "Trip Focus", chips: ["Culture & Museums", "Nature & Outdoors", "Adventure & Sports", "Beach & Relaxation", "Nightlife", "Food Tour", "Shopping", "Family-friendly", "Romance"] },
+      { id: "transportLoc", label: "Getting Around", accent: "gold", chips: ["Public Transit", "Rental Car", "Rideshare", "Bike / E-Bike", "Walk everywhere", "Taxi"] },
+      { id: "food", label: "Food & Dining", accent: "blue", chips: ["Local & Street Food", "Fine Dining", "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-Free"] },
+      { id: "tripFocus", label: "Trip Focus", accent: "gold", chips: ["Culture & Museums", "Nature & Outdoors", "Adventure & Sports", "Beach & Relaxation", "Nightlife", "Food Tour", "Shopping", "Family-friendly", "Romance"] },
     ],
   },
   {
@@ -92,7 +92,7 @@ function CalendarIcon() {
 }
 
 // ── city autocomplete field ─────────────────────────────────
-function CityField({ id, label, value, onChange, placeholder }) {
+function CityField({ id, label, value, onChange, placeholder, error }) {
   const [suggestions, setSuggestions] = useState([]);
   const wrapRef = useRef(null);
 
@@ -122,7 +122,7 @@ function CityField({ id, label, value, onChange, placeholder }) {
   return (
     <div className="field" ref={wrapRef}>
       <label htmlFor={id}>{label}</label>
-      <input id={id} type="text" autoComplete="off" value={value} onChange={handleInput} placeholder={placeholder} />
+      <input id={id} type="text" autoComplete="off" value={value} onChange={handleInput} placeholder={placeholder} className={error ? "invalid" : ""} />
       {suggestions.length > 0 && (
         <div className="ac-list">
           {suggestions.map((c) => (
@@ -130,12 +130,13 @@ function CityField({ id, label, value, onChange, placeholder }) {
           ))}
         </div>
       )}
+      {error && <span className="ferr show">{error}</span>}
     </div>
   );
 }
 
 // ── date range calendar popover (with calendar icon trigger) ─
-function DateRangeField({ startDate, endDate, onChange }) {
+function DateRangeField({ startDate, endDate, onChange, error }) {
   const [open, setOpen] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
   const triggerRef = useRef(null);
@@ -235,6 +236,7 @@ function DateRangeField({ startDate, endDate, onChange }) {
           </div>
         </div>
       )}
+      {error && <span className="ferr show">{error}</span>}
     </div>
   );
 }
@@ -254,6 +256,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
 
   const [selPrefs, setSelPrefs] = useState({}); // { groupId: [labels] }
   const [notes, setNotes] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   function toggleChip(groupId, label) {
     setSelPrefs((prev) => {
@@ -268,8 +271,23 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
     setEndDate(newEnd);
   }
 
+  function validateBasics() {
+    const errs = {};
+    if (!origin.trim()) errs.origin = "Please enter an origin city";
+    if (!destination.trim()) errs.destination = "Please enter a destination";
+    if (origin.trim() && destination.trim() && origin.trim().toLowerCase() === destination.trim().toLowerCase()) {
+      errs.destination = "Destination must differ from origin";
+    }
+    if (!startDate || !endDate) errs.dates = "Please select your travel dates";
+    if (!numberOfTravelers || Number(numberOfTravelers) < 1) errs.numberOfTravelers = "Must be at least 1 traveler";
+    if (budget === "" || Number(budget) < 0) errs.budget = "Must be 0 or more";
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
   function goToPreferences(e) {
     e.preventDefault();
+    if (!validateBasics()) return;
     setStep("preferences");
     setPrefPage(0);
   }
@@ -351,11 +369,11 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
               <div className="field-group">
                 <div className="group-label">Where &amp; When</div>
                 <div className="g2">
-                  <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" />
-                  <CityField id="destination" label="Destination" value={destination} onChange={setDestination} placeholder="Japan" />
+                  <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" error={fieldErrors.origin} />
+                  <CityField id="destination" label="Destination" value={destination} onChange={setDestination} placeholder="Japan" error={fieldErrors.destination} />
                 </div>
                 <div style={{ marginTop: 20 }}>
-                  <DateRangeField startDate={startDate} endDate={endDate} onChange={handleDateChange} />
+                  <DateRangeField startDate={startDate} endDate={endDate} onChange={handleDateChange} error={fieldErrors.dates} />
                 </div>
               </div>
 
@@ -371,7 +389,9 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
                       value={numberOfTravelers}
                       onChange={(e) => setNumberOfTravelers(e.target.value)}
                       disabled={isLoading}
+                      className={fieldErrors.numberOfTravelers ? "invalid" : ""}
                     />
+                    {fieldErrors.numberOfTravelers && <span className="ferr show">{fieldErrors.numberOfTravelers}</span>}
                   </div>
                   <div className="field">
                     <label htmlFor="currency">Currency</label>
@@ -393,7 +413,9 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
                       onChange={(e) => setBudget(e.target.value)}
                       placeholder="3000"
                       disabled={isLoading}
+                      className={fieldErrors.budget ? "invalid" : ""}
                     />
+                    {fieldErrors.budget && <span className="ferr show">{fieldErrors.budget}</span>}
                   </div>
                 </div>
               </div>
@@ -417,7 +439,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
                 />
               ) : (
                 currentPage.groups.map((g) => (
-                  <div className="pref-group" key={g.id}>
+                  <div className={`pref-group accent-${g.accent}`} key={g.id}>
                     <div className="pref-group-lbl">{g.label}</div>
                     <div className="chip-group">
                       {g.chips.map((label) => (
