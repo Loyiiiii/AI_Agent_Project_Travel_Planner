@@ -273,13 +273,13 @@ input.invalid { border-bottom-color: var(--error); }
   background-size: cover;
   background-position: center;
   /* cool blue-tinted overlay via filter, kept dark enough for white text */
-  filter: brightness(.5) saturate(1.05);
+  filter: brightness(.7) saturate(1.05);
 }
 .hero-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(12,21,36,.55) 0%, rgba(12,21,36,.35) 45%, rgba(12,21,36,.75) 100%);
+  background: linear-gradient(180deg, rgba(12,21,36,.4) 0%, rgba(12,21,36,.22) 45%, rgba(12,21,36,.6) 100%);
 }
 .hero-content {
   position: relative;
