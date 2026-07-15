@@ -89,7 +89,7 @@ button:disabled, input:disabled, select:disabled { cursor: not-allowed; opacity:
 
 .field-group { margin-bottom: 24px; }
 .group-label { font-size: 10px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; color: var(--mist); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--stone); }
-.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 .field { display: flex; flex-direction: column; gap: 6px; position: relative; }
 .field.full { grid-column: 1 / -1; }
 
@@ -129,18 +129,19 @@ small { display: block; margin-top: 6px; font-size: 12px; color: var(--mist); }
 
 .field-count { text-transform: none; font-weight: 400; letter-spacing: 0; color: #B0B6C4; }
 
-.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; max-height: 58px; overflow-y: auto; padding-right: 2px; }
 .tag-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 8px 5px 12px; border-radius: 100px;
-  background: var(--ink); color: #fff; font-size: 12px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  padding: 4px 5px 4px 10px; border-radius: 100px;
+  background: transparent; border: 1.5px solid var(--accent); color: var(--accent);
+  font-size: 11px; font-weight: 500; white-space: nowrap;
 }
 .tag-chip button {
-  all: unset; display: flex; align-items: center; justify-content: center;
-  width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,.18);
-  color: #fff; font-size: 13px; line-height: 1; cursor: pointer;
+  all: unset; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 14px; height: 14px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 10px; line-height: 1; cursor: pointer;
 }
-.tag-chip button:hover { background: var(--accent); }
+.tag-chip button:hover { background: var(--gold); color: var(--ink); }
 
 .date-trig { display: flex; align-items: stretch; border-bottom: 1.5px solid var(--stone); cursor: pointer; transition: border-color .2s; padding: 12px 0; }
 .date-trig:hover, .date-trig.open { border-bottom-color: var(--accent); }
