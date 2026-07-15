@@ -344,7 +344,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
                 <div className="group-label">Where &amp; When</div>
                 <div className="g2">
                   <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" error={fieldErrors.origin} />
-                  <CityField id="destination" label="Destination" value={destination} onChange={setDestination} placeholder="Japan" error={fieldErrors.destination} />
+                  <CityField id="destination" label="Destination City" value={destination} onChange={setDestination} placeholder="Japan" error={fieldErrors.destination} />
                 </div>
                 <div style={{ marginTop: 20 }}>
                   <DateRangeField startDate={startDate} endDate={endDate} onChange={handleDateChange} error={fieldErrors.dates} />
