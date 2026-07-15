@@ -129,7 +129,7 @@ small { display: block; margin-top: 6px; font-size: 12px; color: var(--mist); }
 
 .field-count { text-transform: none; font-weight: 400; letter-spacing: 0; color: #B0B6C4; }
 
-.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; max-height: 58px; overflow-y: auto; padding-right: 2px; }
+.tag-list { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px; margin-bottom: 4px; min-height: 58px; max-height: 58px; overflow-y: auto; padding-right: 2px; }
 .tag-chip {
   display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
   padding: 4px 5px 4px 10px; border-radius: 100px;

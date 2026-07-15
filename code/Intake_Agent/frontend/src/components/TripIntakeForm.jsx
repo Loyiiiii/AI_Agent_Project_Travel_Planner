@@ -152,16 +152,14 @@ function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 1
     <div className="field" ref={wrapRef}>
       <label htmlFor={id}>{label} <span className="field-count">({values.length}/{maxItems})</span></label>
 
-      {values.length > 0 && (
-        <div className="tag-list">
-          {values.map((c) => (
-            <span key={c} className="tag-chip">
-              {c}
-              <button type="button" onClick={() => removeCity(c)} aria-label={`Remove ${c}`}>×</button>
-            </span>
-          ))}
-        </div>
-      )}
+      <div className="tag-list">
+        {values.map((c) => (
+          <span key={c} className="tag-chip">
+            {c}
+            <button type="button" onClick={() => removeCity(c)} aria-label={`Remove ${c}`}>×</button>
+          </span>
+        ))}
+      </div>
 
       <input
         id={id}
