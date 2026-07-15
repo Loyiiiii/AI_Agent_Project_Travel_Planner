@@ -1,33 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { CITIES } from "../data/cities";
 
 // ── static data ──────────────────────────────────────────────
-const CITIES = [
-  "Abu Dhabi","Accra","Addis Ababa","Adelaide","Agra","Ahmedabad","Algiers","Almaty",
-  "Amsterdam","Anchorage","Ankara","Athens","Auckland","Austin","Baghdad","Baku",
-  "Bali","Bangkok","Barcelona","Beijing","Beirut","Belgrade","Berlin","Bogota",
-  "Bologna","Bordeaux","Brisbane","Brussels","Bucharest","Budapest","Buenos Aires",
-  "Cairo","Calgary","Cape Town","Casablanca","Chennai","Chicago","Chongqing","Colombo",
-  "Copenhagen","Dakar","Dallas","Dar es Salaam","Delhi","Denver","Dhaka","Doha",
-  "Dubai","Dublin","Durban","Edinburgh","Florence","Frankfurt","Geneva","Glasgow",
-  "Guangzhou","Guatemala City","Hamburg","Hanoi","Havana","Helsinki","Ho Chi Minh City",
-  "Hong Kong","Honolulu","Houston","Hyderabad","Istanbul","Jakarta","Jeddah",
-  "Johannesburg","Karachi","Kathmandu","Kinshasa","Kuala Lumpur","Kuwait City",
-  "Lagos","Lahore","Las Vegas","Lima","Lisbon","London","Los Angeles","Luanda",
-  "Luxembourg City","Lyon","Madrid","Manila","Marseille","Medellin","Melbourne",
-  "Mexico City","Miami","Milan","Minneapolis","Montreal","Moscow","Mumbai",
-  "Munich","Nairobi","Naples","New York City","Nice","Osaka","Oslo","Ottawa",
-  "Panama City","Paris","Perth","Philadelphia","Phnom Penh","Prague","Pune",
-  "Riyadh","Rome","San Francisco","Santiago","Sao Paulo","Seattle","Seoul",
-  "Shanghai","Singapore","Sofia","Stockholm","Sydney","Taipei","Tehran","Tel Aviv",
-  "Tokyo","Toronto","Vancouver","Vienna","Warsaw","Washington DC","Waterloo","Wellington","Zurich",
-  "Calgary, AB","Edmonton, AB","Halifax, NS","Kelowna, BC","Kingston, ON","London, ON",
-  "Mississauga, ON","Montreal, QC","Ottawa, ON","Quebec City, QC","Regina, SK",
-  "Saskatoon, SK","Toronto, ON","Vancouver, BC","Victoria, BC","Waterloo, ON","Winnipeg, MB","Windsor, ON",
-  "Atlanta, GA","Austin, TX","Boston, MA","Charlotte, NC","Dallas, TX","Denver, CO",
-  "Houston, TX","Las Vegas, NV","Los Angeles, CA","Miami, FL","Minneapolis, MN",
-  "Nashville, TN","New Orleans, LA","New York, NY","Orlando, FL","Philadelphia, PA",
-  "Phoenix, AZ","Portland, OR","San Diego, CA","San Francisco, CA","Seattle, WA","Washington, DC",
-];
 
 const CURRENCIES = ["CAD", "USD", "CNY", "EUR", "JPY", "KRW"];
 
