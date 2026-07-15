@@ -127,6 +127,21 @@ small { display: block; margin-top: 6px; font-size: 12px; color: var(--mist); }
 .ac-list div { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--ink); }
 .ac-list div:hover { background: var(--sand); }
 
+.field-count { text-transform: none; font-weight: 400; letter-spacing: 0; color: #B0B6C4; }
+
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 8px 5px 12px; border-radius: 100px;
+  background: var(--ink); color: #fff; font-size: 12px; font-weight: 500;
+}
+.tag-chip button {
+  all: unset; display: flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,.18);
+  color: #fff; font-size: 13px; line-height: 1; cursor: pointer;
+}
+.tag-chip button:hover { background: var(--accent); }
+
 .date-trig { display: flex; align-items: stretch; border-bottom: 1.5px solid var(--stone); cursor: pointer; transition: border-color .2s; padding: 12px 0; }
 .date-trig:hover, .date-trig.open { border-bottom-color: var(--accent); }
 .ds { flex: 1; display: flex; flex-direction: column; gap: 4px; }

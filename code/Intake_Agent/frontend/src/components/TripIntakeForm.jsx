@@ -109,6 +109,82 @@ function CityField({ id, label, value, onChange, placeholder, error }) {
   );
 }
 
+// ── multi-select city field (for destination, up to maxItems) ─
+function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 10, error }) {
+  const [inputValue, setInputValue] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setSuggestions([]);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handleInput(e) {
+    const v = e.target.value;
+    setInputValue(v);
+    if (v.trim().length < 2 || values.length >= maxItems) {
+      setSuggestions([]);
+      return;
+    }
+    setSuggestions(
+      CITIES.filter((c) => c.toLowerCase().includes(v.toLowerCase()) && !values.includes(c)).slice(0, 8)
+    );
+  }
+
+  function addCity(city) {
+    if (values.includes(city) || values.length >= maxItems) return;
+    onChange([...values, city]);
+    setInputValue("");
+    setSuggestions([]);
+  }
+
+  function removeCity(city) {
+    onChange(values.filter((c) => c !== city));
+  }
+
+  const atLimit = values.length >= maxItems;
+
+  return (
+    <div className="field" ref={wrapRef}>
+      <label htmlFor={id}>{label} <span className="field-count">({values.length}/{maxItems})</span></label>
+
+      {values.length > 0 && (
+        <div className="tag-list">
+          {values.map((c) => (
+            <span key={c} className="tag-chip">
+              {c}
+              <button type="button" onClick={() => removeCity(c)} aria-label={`Remove ${c}`}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <input
+        id={id}
+        type="text"
+        autoComplete="off"
+        value={inputValue}
+        onChange={handleInput}
+        placeholder={atLimit ? `Limit of ${maxItems} reached` : placeholder}
+        disabled={atLimit}
+      />
+
+      {suggestions.length > 0 && (
+        <div className="ac-list">
+          {suggestions.map((c) => (
+            <div key={c} onMouseDown={() => addCity(c)}>{c}</div>
+          ))}
+        </div>
+      )}
+      {error && <span className="ferr show">{error}</span>}
+    </div>
+  );
+}
+
 // ── date range calendar popover (with calendar icon trigger) ─
 function DateRangeField({ startDate, endDate, onChange, error }) {
   const [open, setOpen] = useState(false);
@@ -221,7 +297,13 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
   const [prefPage, setPrefPage] = useState(0);
 
   const [origin, setOrigin] = useState(initialData?.origin || "");
-  const [destination, setDestination] = useState(initialData?.destination || "");
+  const [destinations, setDestinations] = useState(
+    Array.isArray(initialData?.destination)
+      ? initialData.destination
+      : initialData?.destination
+      ? initialData.destination.split(",").map((s) => s.trim()).filter(Boolean)
+      : []
+  );
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
   const [endDate, setEndDate] = useState(initialData?.endDate || "");
   const [numberOfTravelers, setNumberOfTravelers] = useState(initialData?.numberOfTravelers || 1);
@@ -248,8 +330,8 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
   function validateBasics() {
     const errs = {};
     if (!origin.trim()) errs.origin = "Please enter an origin city";
-    if (!destination.trim()) errs.destination = "Please enter a destination";
-    if (origin.trim() && destination.trim() && origin.trim().toLowerCase() === destination.trim().toLowerCase()) {
+    if (destinations.length === 0) errs.destination = "Please add at least one destination";
+    if (destinations.length > 0 && destinations.includes(origin.trim())) {
       errs.destination = "Destination must differ from origin";
     }
     if (!startDate || !endDate) errs.dates = "Please select your travel dates";
@@ -297,7 +379,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
 
     const cleanedFormData = {
       origin: origin.trim(),
-      destination: destination.trim(),
+      destination: destinations.join(", "),
       startDate,
       endDate,
       numberOfTravelers: Number(numberOfTravelers),
@@ -344,7 +426,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
                 <div className="group-label">Where &amp; When</div>
                 <div className="g2">
                   <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" error={fieldErrors.origin} />
-                  <CityField id="destination" label="Destination City" value={destination} onChange={setDestination} placeholder="Japan" error={fieldErrors.destination} />
+                  <MultiCityField id="destination" label="Destination City" values={destinations} onChange={setDestinations} placeholder="Search and select up to 10" maxItems={10} error={fieldErrors.destination} />
                 </div>
                 <div style={{ marginTop: 20 }}>
                   <DateRangeField startDate={startDate} endDate={endDate} onChange={handleDateChange} error={fieldErrors.dates} />
