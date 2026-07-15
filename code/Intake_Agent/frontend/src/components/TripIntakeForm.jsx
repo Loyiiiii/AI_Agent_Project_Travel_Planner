@@ -152,15 +152,6 @@ function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 1
     <div className="field" ref={wrapRef}>
       <label htmlFor={id}>{label} <span className="field-count">({values.length}/{maxItems})</span></label>
 
-      <div className="tag-list">
-        {values.map((c) => (
-          <span key={c} className="tag-chip">
-            {c}
-            <button type="button" onClick={() => removeCity(c)} aria-label={`Remove ${c}`}>×</button>
-          </span>
-        ))}
-      </div>
-
       <input
         id={id}
         type="text"
@@ -178,6 +169,16 @@ function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 1
           ))}
         </div>
       )}
+
+      <div className="tag-list">
+        {values.map((c) => (
+          <span key={c} className="tag-chip">
+            {c}
+            <button type="button" onClick={() => removeCity(c)} aria-label={`Remove ${c}`}>×</button>
+          </span>
+        ))}
+      </div>
+
       {error && <span className="ferr show">{error}</span>}
     </div>
   );
@@ -422,8 +423,8 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
             <form onSubmit={goToPreferences}>
               <div className="field-group">
                 <div className="group-label">Where &amp; When</div>
-                <div className="g2">
-                  <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" error={fieldErrors.origin} />
+                <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" error={fieldErrors.origin} />
+                <div style={{ marginTop: 20 }}>
                   <MultiCityField id="destination" label="Destination City" values={destinations} onChange={setDestinations} placeholder="Search and select up to 10" maxItems={10} error={fieldErrors.destination} />
                 </div>
                 <div style={{ marginTop: 20 }}>
