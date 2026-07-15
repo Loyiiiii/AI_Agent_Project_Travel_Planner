@@ -110,7 +110,7 @@ function CityField({ id, label, value, onChange, placeholder, error }) {
 }
 
 // ── multi-select city field (for destination, up to maxItems) ─
-function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 10, error }) {
+function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 10, error, exclude }) {
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const wrapRef = useRef(null);
@@ -131,12 +131,18 @@ function MultiCityField({ id, label, values, onChange, placeholder, maxItems = 1
       return;
     }
     setSuggestions(
-      CITIES.filter((c) => c.toLowerCase().includes(v.toLowerCase()) && !values.includes(c)).slice(0, 8)
+      CITIES.filter(
+        (c) =>
+          c.toLowerCase().includes(v.toLowerCase()) &&
+          !values.includes(c) &&
+          c.toLowerCase() !== (exclude || "").trim().toLowerCase()
+      ).slice(0, 8)
     );
   }
 
   function addCity(city) {
     if (values.includes(city) || values.length >= maxItems) return;
+    if (city.toLowerCase() === (exclude || "").trim().toLowerCase()) return;
     onChange([...values, city]);
     setInputValue("");
     setSuggestions([]);
@@ -330,7 +336,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
     const errs = {};
     if (!origin.trim()) errs.origin = "Please enter an origin city";
     if (destinations.length === 0) errs.destination = "Please add at least one destination";
-    if (destinations.length > 0 && destinations.includes(origin.trim())) {
+    if (destinations.some((d) => d.trim().toLowerCase() === origin.trim().toLowerCase())) {
       errs.destination = "Destination must differ from origin";
     }
     if (!startDate || !endDate) errs.dates = "Please select your travel dates";
@@ -425,7 +431,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
                 <div className="group-label">Where &amp; When</div>
                 <CityField id="origin" label="Origin City" value={origin} onChange={setOrigin} placeholder="Toronto" error={fieldErrors.origin} />
                 <div style={{ marginTop: 20 }}>
-                  <MultiCityField id="destination" label="Destination City" values={destinations} onChange={setDestinations} placeholder="Search and select up to 10" maxItems={10} error={fieldErrors.destination} />
+                  <MultiCityField id="destination" label="Destination City" values={destinations} onChange={setDestinations} placeholder="Search and select up to 10" maxItems={10} error={fieldErrors.destination} exclude={origin} />
                 </div>
                 <div style={{ marginTop: 20 }}>
                   <DateRangeField startDate={startDate} endDate={endDate} onChange={handleDateChange} error={fieldErrors.dates} />
