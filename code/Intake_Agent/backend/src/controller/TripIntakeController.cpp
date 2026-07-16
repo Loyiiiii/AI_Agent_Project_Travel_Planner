@@ -76,8 +76,16 @@ TripRequest TripIntakeController::parseTripRequestFromJson(
         tripRequest.setOrigin(requestBody["origin"].get<std::string>());
     }
 
-    if (requestBody.contains("destination") && requestBody["destination"].is_string()) {
-        tripRequest.setDestination(requestBody["destination"].get<std::string>());
+    if (requestBody.contains("destination") && requestBody["destination"].is_array()) {
+        std::vector<std::string> destinations;
+
+        for (const auto& destinationCity : requestBody["destination"]) {
+            if (destinationCity.is_string()) {
+                destinations.push_back(destinationCity.get<std::string>());
+            }
+        }
+
+        tripRequest.setDestination(destinations);
     }
 
     if (requestBody.contains("startDate") && requestBody["startDate"].is_string()) {
