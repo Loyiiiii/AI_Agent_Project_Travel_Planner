@@ -150,7 +150,9 @@ function TripIntakePage() {
 
                 <div className="summary-row">
                   <span className="summary-label">Destination:</span>
-                  <span className="summary-value">{tripRequest.destination}</span>
+                  <span className="summary-value">
+                    {Array.isArray(tripRequest.destination) ? tripRequest.destination.join(", ") : tripRequest.destination}
+                  </span>
                 </div>
 
                 <div className="summary-row">

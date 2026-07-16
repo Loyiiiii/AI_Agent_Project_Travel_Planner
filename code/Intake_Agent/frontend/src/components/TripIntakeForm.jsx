@@ -384,7 +384,7 @@ function TripIntakeForm({ initialData, onSubmit, isLoading }) {
 
     const cleanedFormData = {
       origin: origin.trim(),
-      destination: destinations.join(", "),
+      destination: destinations,
       startDate,
       endDate,
       numberOfTravelers: Number(numberOfTravelers),
