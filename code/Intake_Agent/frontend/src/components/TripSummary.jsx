@@ -8,13 +8,13 @@ function TripSummary({ tripRequest, onConfirm, onEdit, isLoading }) {
     );
   }
 
-  function formatList(items) {
+  function formatList(items, separator = ", ") {
     if (!items) {
       return "None";
     }
 
     if (Array.isArray(items)) {
-      return items.length === 0 ? "None" : items.join(", ");
+      return items.length === 0 ? "None" : items.join(separator);
     }
 
     return items;
@@ -41,7 +41,7 @@ function TripSummary({ tripRequest, onConfirm, onEdit, isLoading }) {
 
         <div className="summary-row">
           <span className="summary-label">Destination:</span>
-          <span className="summary-value">{formatList(tripRequest.destination)}</span>
+          <span className="summary-value">{formatList(tripRequest.destination, " · ")}</span>
         </div>
 
         <div className="summary-row">
